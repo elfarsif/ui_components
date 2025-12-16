@@ -6,6 +6,7 @@ import './App.css'
 function App() {
   const [count, setCount] = useState(0)
   const [originalData, setOriginalData] = useState(null)
+  const [message, setMessage] = useState("Sample user message from iframe")
 
   useEffect(() => {
     const handleMessage = (event) => {
@@ -31,6 +32,38 @@ function App() {
       window.removeEventListener("message", handleMessage);
     };
   }, []);
+
+  const sendMessageToParent = () => {
+    // Sample LLM payload
+    const llmPayload = {
+      action: "user_response",
+      timestamp: new Date().toISOString(),
+      data: {
+        selectedOption: "Option 1",
+        userInput: message,
+        metadata: {
+          source: "iframe_component",
+          version: "1.0.0"
+        }
+      }
+    };
+
+    // Send message to parent
+    window.parent.postMessage(
+      {
+        type: "ui_component_user_message",
+        message: message,
+        llmMessage: JSON.stringify(llmPayload)
+      },
+      "*"
+    );
+
+    console.log("Message sent to parent:", {
+      type: "ui_component_user_message",
+      message: message,
+      llmMessage: llmPayload
+    });
+  };
 
   return (
     <>
@@ -66,6 +99,24 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       
+      <div className="message-section">
+        <h2>Send Message to Parent</h2>
+        <div className="message-controls">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Enter message to send to parent"
+            className="message-input"
+          />
+          <button onClick={sendMessageToParent} className="send-button">
+            Send Message to Parent
+          </button>
+        </div>
+        <p className="message-hint">
+          This will send a message to the parent window with type "ui_component_user_message"
+        </p>
+      </div>
     </>
   )
 }

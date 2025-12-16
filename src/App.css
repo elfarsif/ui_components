@@ -40,3 +40,71 @@
 .read-the-docs {
   color: #888;
 }
+
+.data-display {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  border: 1px solid #646cff;
+  border-radius: 8px;
+  text-align: left;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.data-info {
+  margin: 1rem 0;
+}
+
+.data-info p {
+  margin: 0.5rem 0;
+}
+
+.columns-preview,
+.rows-preview {
+  margin: 1rem 0;
+}
+
+.columns-preview ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.columns-preview li {
+  padding: 0.5rem;
+  margin: 0.25rem 0;
+  background-color: rgba(100, 108, 255, 0.05);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.rows-preview pre {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.85em;
+}
+
+.waiting-message {
+  color: #888;
+  font-style: italic;
+  padding: 1rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .data-display {
+    background-color: rgba(100, 108, 255, 0.05);
+    border-color: #646cff;
+  }
+
+  .columns-preview li {
+    background-color: rgba(100, 108, 255, 0.1);
+  }
+
+  .rows-preview pre {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}

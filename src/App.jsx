@@ -168,26 +168,6 @@ function App() {
           <p className="waiting-message">Waiting for data from parent window...</p>
         )}
       </div>
-      <h1>Vite + React</h1>
-      
-      <div className="message-section">
-        <h2>Send Message to Parent</h2>
-        <div className="message-controls">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Enter message to send to parent"
-            className="message-input"
-          />
-          <button onClick={sendMessageToParent} className="send-button">
-            Send Message to Parent
-          </button>
-        </div>
-        <p className="message-hint">
-          This will send a message to the parent window with type "ui_component_user_message"
-        </p>
-      </div>
     </>
   )
 }

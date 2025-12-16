@@ -7,6 +7,7 @@ function App() {
   const [count, setCount] = useState(0)
   const [originalData, setOriginalData] = useState(null)
   const [message, setMessage] = useState("Sample user message from iframe")
+  const [formValues, setFormValues] = useState({})
 
   useEffect(() => {
     const handleMessage = (event) => {
@@ -22,6 +23,22 @@ function App() {
         console.log("Received data:", data.payload);
         console.log("Columns:", data.payload.columns);
         console.log("Rows:", data.payload.rows);
+        
+        // Initialize form values from first row
+        if (data.payload.rows && data.payload.rows.length > 0) {
+          const firstRow = data.payload.rows[0];
+          const initialValues = {};
+          
+          // Extract column names and map to first row values
+          data.payload.columns.forEach((col, index) => {
+            // Handle both string columns and object columns
+            const columnName = typeof col === 'string' ? col : (col.name || col.key || col.field || `column_${index}`);
+            initialValues[columnName] = firstRow[columnName] !== undefined ? firstRow[columnName] : '';
+          });
+          
+          setFormValues(initialValues);
+          console.log("Initialized form values:", initialValues);
+        }
       }
     };
 
@@ -68,29 +85,50 @@ function App() {
   return (
     <>
       <div>
-        {originalData && (
+        {originalData && originalData.columns && originalData.rows && originalData.rows.length > 0 && (
           <div className="data-display">
-            <h2>Received Data</h2>
-            <div className="data-info">
-              <p><strong>Columns:</strong> {originalData.columns?.length || 0}</p>
-              <p><strong>Rows:</strong> {originalData.rows?.length || 0}</p>
-            </div>
-            {originalData.columns && (
-              <div className="columns-preview">
-                <h3>Columns:</h3>
-                <ul>
-                  {originalData.columns.map((col, index) => (
-                    <li key={index}>{JSON.stringify(col)}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {originalData.rows && originalData.rows.length > 0 && (
-              <div className="rows-preview">
-                <h3>First Row Sample:</h3>
-                <pre>{JSON.stringify(originalData.rows[0], null, 2)}</pre>
-              </div>
-            )}
+            <h2>Form</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              console.log("Form submitted with values:", formValues);
+            }}>
+              {originalData.columns.map((col, index) => {
+                // Extract column name - handle both string and object columns
+                const columnName = typeof col === 'string' 
+                  ? col 
+                  : (col.name || col.key || col.field || col.label || `column_${index}`);
+                
+                // Get column label for display
+                const columnLabel = typeof col === 'string' 
+                  ? col 
+                  : (col.label || col.name || col.key || col.field || `Column ${index + 1}`);
+                
+                const value = formValues[columnName] !== undefined ? formValues[columnName] : '';
+                
+                return (
+                  <div key={index} className="form-field">
+                    <label htmlFor={`field-${index}`}>
+                      {columnLabel}:
+                    </label>
+                    <input
+                      id={`field-${index}`}
+                      type="text"
+                      value={value}
+                      onChange={(e) => {
+                        setFormValues({
+                          ...formValues,
+                          [columnName]: e.target.value
+                        });
+                      }}
+                      className="form-input"
+                    />
+                  </div>
+                );
+              })}
+              <button type="submit" className="submit-button">
+                Submit
+              </button>
+            </form>
           </div>
         )}
         {!originalData && (

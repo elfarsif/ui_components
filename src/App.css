@@ -4,7 +4,7 @@
   padding: 2rem;
   text-align: center;
 }
-
+ 
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -17,7 +17,7 @@
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
-
+ 
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -26,25 +26,25 @@
     transform: rotate(360deg);
   }
 }
-
+ 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
 }
-
+ 
 .card {
   padding: 2em;
 }
-
+ 
 .read-the-docs {
   color: #888;
 }
-
+ 
 .data-display {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background-color: rgba(100, 108, 255, 0.1);
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: white;
   border: 1px solid #646cff;
   border-radius: 8px;
   text-align: left;
@@ -52,25 +52,33 @@
   margin-left: auto;
   margin-right: auto;
 }
-
+ 
+.data-display h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #213547;
+}
+ 
 .data-info {
   margin: 1rem 0;
 }
-
+ 
 .data-info p {
   margin: 0.5rem 0;
 }
-
+ 
 .columns-preview,
 .rows-preview {
   margin: 1rem 0;
 }
-
+ 
 .columns-preview ul {
   list-style-type: none;
   padding-left: 0;
 }
-
+ 
 .columns-preview li {
   padding: 0.5rem;
   margin: 0.25rem 0;
@@ -79,7 +87,7 @@
   font-family: monospace;
   font-size: 0.9em;
 }
-
+ 
 .rows-preview pre {
   background-color: rgba(0, 0, 0, 0.2);
   padding: 1rem;
@@ -87,13 +95,13 @@
   overflow-x: auto;
   font-size: 0.85em;
 }
-
+ 
 .waiting-message {
   color: #888;
   font-style: italic;
   padding: 1rem;
 }
-
+ 
 .message-section {
   margin: 2rem 0;
   padding: 1.5rem;
@@ -104,19 +112,19 @@
   margin-left: auto;
   margin-right: auto;
 }
-
+ 
 .message-section h2 {
   margin-top: 0;
   margin-bottom: 1rem;
 }
-
+ 
 .message-controls {
   display: flex;
   gap: 0.75rem;
   margin-bottom: 0.5rem;
   flex-wrap: wrap;
 }
-
+ 
 .message-input {
   flex: 1;
   min-width: 200px;
@@ -129,16 +137,16 @@
   font-family: inherit;
   transition: border-color 0.25s;
 }
-
+ 
 .message-input:focus {
   outline: none;
   border-color: #535bf2;
 }
-
+ 
 .message-input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
-
+ 
 .send-button {
   padding: 0.75rem 1.5rem;
   background-color: #646cff;
@@ -152,119 +160,137 @@
   transition: background-color 0.25s, border-color 0.25s;
   white-space: nowrap;
 }
-
+ 
 .send-button:hover {
   background-color: #535bf2;
   border-color: #535bf2;
 }
-
+ 
 .send-button:active {
   background-color: #4348d4;
 }
-
+ 
 .message-hint {
   color: #888;
   font-size: 0.9em;
   margin: 0.5rem 0 0 0;
   font-style: italic;
 }
-
-.form-field {
-  margin-bottom: 1.5rem;
+ 
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1.25rem;
 }
-
+ 
+.form-field {
+  margin-bottom: 0;
+}
+ 
 .form-field label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.87);
+  color: #213547;
+  font-size: 0.875em;
 }
-
+ 
 .form-input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  background-color: #1a1a1a;
+  padding: 0.5rem 0.75rem;
+  background-color: #f9f9f9;
   border: 1px solid #646cff;
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.87);
-  font-size: 1em;
+  border-radius: 6px;
+  color: #213547;
+  font-size: 0.875em;
   font-family: inherit;
   transition: border-color 0.25s;
   box-sizing: border-box;
 }
-
+ 
 .form-input:focus {
   outline: none;
   border-color: #535bf2;
 }
-
+ 
 .submit-button {
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   background-color: #646cff;
   border: 1px solid #646cff;
-  border-radius: 8px;
+  border-radius: 6px;
   color: white;
-  font-size: 1em;
+  font-size: 0.875em;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
   transition: background-color 0.25s, border-color 0.25s;
-  margin-top: 1rem;
+  width: auto;
+  grid-column: 2;
+  justify-self: end;
+  align-self: end;
 }
-
+ 
 .submit-button:hover {
   background-color: #535bf2;
   border-color: #535bf2;
 }
-
+ 
 .submit-button:active {
   background-color: #4348d4;
 }
-
+ 
+@media (max-width: 768px) {
+  form {
+    grid-template-columns: 1fr;
+  }
+}
+ 
 @media (prefers-color-scheme: light) {
   .data-display {
-    background-color: rgba(100, 108, 255, 0.05);
+    background-color: white;
     border-color: #646cff;
   }
-
+ 
   .columns-preview li {
     background-color: rgba(100, 108, 255, 0.1);
   }
-
+ 
   .rows-preview pre {
     background-color: rgba(0, 0, 0, 0.05);
   }
-
+ 
   .message-section {
     background-color: rgba(100, 108, 255, 0.05);
     border-color: #646cff;
   }
-
+ 
   .message-input {
     background-color: #f9f9f9;
     color: #213547;
     border-color: #646cff;
   }
-
+ 
   .message-input::placeholder {
     color: rgba(33, 53, 71, 0.5);
   }
-
+ 
   .message-input:focus {
     border-color: #535bf2;
   }
-
+ 
   .form-field label {
     color: #213547;
   }
-
+ 
   .form-input {
     background-color: #f9f9f9;
     color: #213547;
     border-color: #646cff;
   }
-
+ 
   .form-input:focus {
     border-color: #535bf2;
   }
 }
+ 
+ 

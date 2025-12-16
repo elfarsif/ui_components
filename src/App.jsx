@@ -82,6 +82,38 @@ function App() {
     });
   };
 
+  const sendFormDataToParent = () => {
+    // Create LLM payload with form data
+    const llmPayload = {
+      action: "form_submission",
+      timestamp: new Date().toISOString(),
+      data: {
+        formFields: formValues,
+        metadata: {
+          source: "iframe_component",
+          version: "1.0.0"
+        }
+      }
+    };
+
+    // Send form data to parent
+    window.parent.postMessage(
+      {
+        type: "ui_component_user_message",
+        message: "Form submitted",
+        llmMessage: JSON.stringify(llmPayload)
+      },
+      "*"
+    );
+
+    console.log("Form data sent to parent:", {
+      type: "ui_component_user_message",
+      message: "Form submitted",
+      formFields: formValues,
+      llmMessage: llmPayload
+    });
+  };
+
   return (
     <>
       <div>
@@ -91,6 +123,7 @@ function App() {
             <form onSubmit={(e) => {
               e.preventDefault();
               console.log("Form submitted with values:", formValues);
+              sendFormDataToParent();
             }}>
               {originalData.columns.map((col, index) => {
                 // Extract column name - handle both string and object columns

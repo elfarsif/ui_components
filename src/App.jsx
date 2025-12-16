@@ -96,11 +96,11 @@ function App() {
       }
     };
 
-    // Send form data to parent
+    // Send form data to parent with form fields and values
     window.parent.postMessage(
       {
         type: "ui_component_user_message",
-        message: "Form submitted",
+        message: formValues,
         llmMessage: JSON.stringify(llmPayload)
       },
       "*"
@@ -108,7 +108,7 @@ function App() {
 
     console.log("Form data sent to parent:", {
       type: "ui_component_user_message",
-      message: "Form submitted",
+      message: formValues,
       formFields: formValues,
       llmMessage: llmPayload
     });

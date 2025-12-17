@@ -135,25 +135,102 @@ function App() {
                   ? col 
                   : (col.label || col.name || col.key || col.field || `Column ${index + 1}`);
                 
+                // Get field type (default to 'text')
+                const fieldType = typeof col === 'object' && col.type 
+                  ? col.type.toLowerCase() 
+                  : 'text';
+                
+                // Get options for select/radio fields
+                const options = typeof col === 'object' && col.options 
+                  ? col.options 
+                  : [];
+                
                 const value = formValues[columnName] !== undefined ? formValues[columnName] : '';
+                
+                // Handle different field types
+                const renderField = () => {
+                  if (fieldType === 'select' && options.length > 0) {
+                    // Render dropdown/select
+                    return (
+                      <select
+                        id={`field-${index}`}
+                        value={value}
+                        onChange={(e) => {
+                          setFormValues({
+                            ...formValues,
+                            [columnName]: e.target.value
+                          });
+                        }}
+                        className="form-input"
+                      >
+                        <option value="">-- Select an option --</option>
+                        {options.map((option, optIndex) => {
+                          const optionValue = typeof option === 'string' ? option : (option.value || option.label || option);
+                          const optionLabel = typeof option === 'string' ? option : (option.label || option.value || option);
+                          return (
+                            <option key={optIndex} value={optionValue}>
+                              {optionLabel}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    );
+                  } else if (fieldType === 'radio' && options.length > 0) {
+                    // Render radio buttons
+                    return (
+                      <div className="radio-group">
+                        {options.map((option, optIndex) => {
+                          const optionValue = typeof option === 'string' ? option : (option.value || option.label || option);
+                          const optionLabel = typeof option === 'string' ? option : (option.label || option.value || option);
+                          return (
+                            <div key={optIndex} className="radio-option">
+                              <input
+                                type="radio"
+                                id={`field-${index}-${optIndex}`}
+                                name={columnName}
+                                value={optionValue}
+                                checked={value === optionValue}
+                                onChange={(e) => {
+                                  setFormValues({
+                                    ...formValues,
+                                    [columnName]: e.target.value
+                                  });
+                                }}
+                                className="radio-input"
+                              />
+                              <label htmlFor={`field-${index}-${optIndex}`} className="radio-label">
+                                {optionLabel}
+                              </label>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  } else {
+                    // Default to text input
+                    return (
+                      <input
+                        id={`field-${index}`}
+                        type="text"
+                        value={value}
+                        onChange={(e) => {
+                          setFormValues({
+                            ...formValues,
+                            [columnName]: e.target.value
+                          });
+                        }}
+                        className="form-input"
+                      />
+                    );
+                  }
+                };
                 
                 return (
                   <div key={index} className="form-field">
                     <label htmlFor={`field-${index}`}>
                       {columnLabel}:
                     </label>
-                    <input
-                      id={`field-${index}`}
-                      type="text"
-                      value={value}
-                      onChange={(e) => {
-                        setFormValues({
-                          ...formValues,
-                          [columnName]: e.target.value
-                        });
-                      }}
-                      className="form-input"
-                    />
+                    {renderField()}
                   </div>
                 );
               })}

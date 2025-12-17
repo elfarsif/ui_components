@@ -8,15 +8,13 @@
  *   "type": "ui_component_render",
  *   "source": "agentos",
  *   "payload": {
- *     "messages": [],
- *     "data": [
- *       {
- *         "id": "WL01002",
- *         "name": "MSA",
- *         "rule": "( ( 'userAttributes.User Department' = \"[Id=82,Name=MSA]\" ) OR ( 'source.entityTypeId' = 160 ) )",
- *         "publishedVersion": "487.0",
- *         "uuid": "bc98f914-81b6-41a4-b8da-897979c23be0"
- *       },
+ *     "columns": [
+ *       {"key": "id", "label": "Workflow ID"},
+ *       {"key": "name", "label": "Workflow Name"}
+ *     ],
+ *     "rows": [
+ *       {"id": "WL01002", "name": "MSA"},
+ *       {"id": "WL01005", "name": "Other Folder"},
  *       ...
  *     ]
  *   }
@@ -24,15 +22,13 @@
  * 
  * Option 2: Direct data structure (fallback)
  * {
- *   "messages": [],
- *   "data": [
- *     {
- *       "id": "WL01002",
- *       "name": "MSA",
- *       "rule": "...",
- *       "publishedVersion": "487.0",
- *       "uuid": "bc98f914-81b6-41a4-b8da-897979c23be0"
- *     },
+ *   "columns": [
+ *     {"key": "id", "label": "Workflow ID"},
+ *     {"key": "name", "label": "Workflow Name"}
+ *   ],
+ *   "rows": [
+ *     {"id": "WL01002", "name": "MSA"},
+ *     {"id": "WL01005", "name": "Other Folder"},
  *     ...
  *   ]
  * }
@@ -59,38 +55,32 @@ export const inputSchema = {
     payload: {
       type: "object",
       properties: {
-        messages: {
-          type: "array",
-          items: {}
-        },
-        data: {
+        columns: {
           type: "array",
           items: {
             type: "object",
             properties: {
-              id: {
+              key: {
                 type: "string",
                 required: true
               },
-              name: {
+              label: {
                 type: "string",
                 required: true
-              },
-              rule: {
-                type: ["string", "null"]
-              },
-              publishedVersion: {
-                type: "string"
-              },
-              uuid: {
-                type: "string"
               }
             },
-            required: ["id", "name"]
+            required: ["key", "label"]
+          }
+        },
+        rows: {
+          type: "array",
+          items: {
+            type: "object",
+            description: "Object with properties matching the keys from columns array"
           }
         }
       },
-      required: ["data"]
+      required: ["columns", "rows"]
     }
   }
 }

@@ -6,14 +6,14 @@ function HelloWorld() {
   const [selectedName, setSelectedName] = useState('')
   const { originalData } = useIframeMessages()
 
-  // Extract names from the data array
+  // Extract names from the rows array
   const getNames = () => {
-    if (!originalData || !originalData.data || !Array.isArray(originalData.data) || originalData.data.length === 0) {
+    if (!originalData || !originalData.rows || !Array.isArray(originalData.rows) || originalData.rows.length === 0) {
       return []
     }
 
-    // Extract names from data array (each item has a "name" property)
-    const names = originalData.data
+    // Extract names from rows array (each item has a "name" property)
+    const names = originalData.rows
       .map(item => item.name)
       .filter(name => name !== undefined && name !== null && name !== '')
     
@@ -23,12 +23,12 @@ function HelloWorld() {
 
   // Get the id for the selected name
   const getSelectedId = () => {
-    if (!selectedName || !originalData || !originalData.data || !Array.isArray(originalData.data)) {
+    if (!selectedName || !originalData || !originalData.rows || !Array.isArray(originalData.rows)) {
       return null
     }
 
     // Find the item with the selected name
-    const selectedItem = originalData.data.find(item => item.name === selectedName)
+    const selectedItem = originalData.rows.find(item => item.name === selectedName)
     return selectedItem ? selectedItem.id : null
   }
 

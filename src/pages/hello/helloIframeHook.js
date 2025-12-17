@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 /**
  * Custom hook to handle iframe messages from parent window
- * Local hook for HelloWorld page - accepts payload with { messages: [], data: [...] } structure
+ * Local hook for HelloWorld page - accepts payload with { columns: [...], rows: [...] } structure
  * 
  * INPUT SCHEMA (Expected payload from parent):
  * 
@@ -11,30 +11,28 @@ import { useState, useEffect } from 'react'
  *   "type": "ui_component_render",
  *   "source": "agentos",
  *   "payload": {
- *     "messages": [],
- *     "data": [
- *       {
- *         "id": "WL01002",
- *         "name": "MSA",
- *         "rule": "...",
- *         "publishedVersion": "487.0",
- *         "uuid": "bc98f914-81b6-41a4-b8da-897979c23be0"
- *       }
+ *     "columns": [
+ *       {"key": "id", "label": "Workflow ID"},
+ *       {"key": "name", "label": "Workflow Name"}
+ *     ],
+ *     "rows": [
+ *       {"id": "WL01002", "name": "MSA"},
+ *       {"id": "WL01005", "name": "Other Folder"},
+ *       ...
  *     ]
  *   }
  * }
  * 
  * Option 2: Direct data structure (fallback)
  * {
- *   "messages": [],
- *   "data": [
- *     {
- *       "id": "WL01002",
- *       "name": "MSA",
- *       "rule": "...",
- *       "publishedVersion": "487.0",
- *       "uuid": "bc98f914-81b6-41a4-b8da-897979c23be0"
- *     }
+ *   "columns": [
+ *     {"key": "id", "label": "Workflow ID"},
+ *     {"key": "name", "label": "Workflow Name"}
+ *   ],
+ *   "rows": [
+ *     {"id": "WL01002", "name": "MSA"},
+ *     {"id": "WL01005", "name": "Other Folder"},
+ *     ...
  *   ]
  * }
  * 
@@ -46,7 +44,7 @@ import { useState, useEffect } from 'react'
  * }
  * 
  * @param {Function} onDataReceived - Callback function called when data is received
- * @returns {Object} - Object containing originalData with data array
+ * @returns {Object} - Object containing originalData with columns and rows arrays
  */
 export function useIframeMessages(onDataReceived) {
   const [originalData, setOriginalData] = useState(null)
@@ -60,20 +58,28 @@ export function useIframeMessages(onDataReceived) {
       if (
         data?.type === "ui_component_render" &&
         data?.source === "agentos" &&
-        data?.payload?.data &&
-        Array.isArray(data.payload.data)
+        data?.payload?.columns &&
+        Array.isArray(data.payload.columns) &&
+        data?.payload?.rows &&
+        Array.isArray(data.payload.rows)
       ) {
         const payload = data.payload
         setOriginalData(payload)
         console.log("Received payload:", payload)
-        console.log("Data array:", payload.data)
-        console.log("Messages:", payload.messages)
+        console.log("Columns array:", payload.columns)
+        console.log("Rows array:", payload.rows)
       }
       // Fallback: Check for direct data structure
-      else if (data?.data && Array.isArray(data.data)) {
+      else if (
+        data?.columns &&
+        Array.isArray(data.columns) &&
+        data?.rows &&
+        Array.isArray(data.rows)
+      ) {
         setOriginalData(data)
         console.log("Received payload (fallback):", data)
-        console.log("Data array:", data.data)
+        console.log("Columns array:", data.columns)
+        console.log("Rows array:", data.rows)
       }
     }
 

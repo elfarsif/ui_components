@@ -1,7 +1,7 @@
 function HelloWorld() {
   return (
     <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1>Hello World</h1>
+      <h1>hello world</h1>
     </div>
   )
 }

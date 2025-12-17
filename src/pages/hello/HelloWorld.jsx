@@ -1,101 +1,35 @@
 import { useState } from 'react'
-import { useIframeMessages } from '../../hooks/useIframeMessages'
+import { useIframeMessages } from './helloIframeHook'
 import './HelloWorld.css'
 
 function HelloWorld() {
   const [selectedName, setSelectedName] = useState('')
   const { originalData } = useIframeMessages()
 
-  // Extract names from the payload
+  // Extract names from the data array
   const getNames = () => {
-    if (!originalData || !originalData.columns || !originalData.rows || originalData.rows.length === 0) {
+    if (!originalData || !originalData.data || !Array.isArray(originalData.data) || originalData.data.length === 0) {
       return []
     }
 
-    // Try to find a "name" column first, otherwise use the first column
-    let nameColumn = null
-    
-    // Look for a column with "name" in it
-    for (const col of originalData.columns) {
-      const columnName = typeof col === 'string' 
-        ? col 
-        : (col.name || col.key || col.field || '')
-      
-      if (columnName.toLowerCase().includes('name')) {
-        nameColumn = columnName
-        break
-      }
-    }
-
-    // If no "name" column found, use the first column
-    if (!nameColumn && originalData.columns.length > 0) {
-      const firstCol = originalData.columns[0]
-      nameColumn = typeof firstCol === 'string' 
-        ? firstCol 
-        : (firstCol.name || firstCol.key || firstCol.field || 'column_0')
-    }
-
-    if (!nameColumn) return []
-
-    // Extract unique names from rows
-    const names = originalData.rows
-      .map(row => row[nameColumn])
+    // Extract names from data array (each item has a "name" property)
+    const names = originalData.data
+      .map(item => item.name)
       .filter(name => name !== undefined && name !== null && name !== '')
     
     // Remove duplicates
     return [...new Set(names)]
   }
 
-  // Find id column
-  const getIdColumn = () => {
-    if (!originalData || !originalData.columns) return null
-
-    // Look for a column with "id" in it
-    for (const col of originalData.columns) {
-      const columnName = typeof col === 'string' 
-        ? col 
-        : (col.name || col.key || col.field || '')
-      
-      if (columnName.toLowerCase().includes('id')) {
-        return columnName
-      }
-    }
-    return null
-  }
-
   // Get the id for the selected name
   const getSelectedId = () => {
-    if (!selectedName || !originalData || !originalData.rows) return null
-
-    // Find name column
-    let nameColumn = null
-    for (const col of originalData.columns) {
-      const columnName = typeof col === 'string' 
-        ? col 
-        : (col.name || col.key || col.field || '')
-      
-      if (columnName.toLowerCase().includes('name')) {
-        nameColumn = columnName
-        break
-      }
+    if (!selectedName || !originalData || !originalData.data || !Array.isArray(originalData.data)) {
+      return null
     }
 
-    // If no "name" column found, use the first column
-    if (!nameColumn && originalData.columns.length > 0) {
-      const firstCol = originalData.columns[0]
-      nameColumn = typeof firstCol === 'string' 
-        ? firstCol 
-        : (firstCol.name || firstCol.key || firstCol.field || 'column_0')
-    }
-
-    if (!nameColumn) return null
-
-    const idColumn = getIdColumn()
-    if (!idColumn) return null
-
-    // Find the row with the selected name
-    const selectedRow = originalData.rows.find(row => row[nameColumn] === selectedName)
-    return selectedRow ? selectedRow[idColumn] : null
+    // Find the item with the selected name
+    const selectedItem = originalData.data.find(item => item.name === selectedName)
+    return selectedItem ? selectedItem.id : null
   }
 
   const sendDataToParent = () => {

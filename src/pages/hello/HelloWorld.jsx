@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useIframeMessages } from '../hooks/useIframeMessages'
+import { useIframeMessages } from '../../hooks/useIframeMessages'
 import './HelloWorld.css'
 
 function HelloWorld() {

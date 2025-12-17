@@ -125,7 +125,7 @@ function FormPage() {
                         }}
                         className="form-input"
                       >
-                        <option value="">-- Select an option --</option>
+                        <option value="">Select {columnLabel.toLowerCase()}</option>
                         {options.map((option, optIndex) => {
                           const optionValue = typeof option === 'string' ? option : (option.value || option.label || option);
                           const optionLabel = typeof option === 'string' ? option : (option.label || option.value || option);
@@ -136,6 +136,23 @@ function FormPage() {
                           );
                         })}
                       </select>
+                    );
+                  } else if (fieldType === 'date') {
+                    // Render date input
+                    return (
+                      <input
+                        id={`field-${index}`}
+                        type="date"
+                        value={value}
+                        onChange={(e) => {
+                          setFormValues({
+                            ...formValues,
+                            [columnName]: e.target.value
+                          });
+                        }}
+                        className="form-input"
+                        placeholder="Select date"
+                      />
                     );
                   } else if (fieldType === 'radio' && options.length > 0) {
                     // Render radio buttons
@@ -182,6 +199,7 @@ function FormPage() {
                           });
                         }}
                         className="form-input"
+                        placeholder={`Enter ${columnLabel.toLowerCase()}`}
                       />
                     );
                   }
@@ -190,7 +208,7 @@ function FormPage() {
                 return (
                   <div key={index} className="form-field">
                     <label htmlFor={`field-${index}`}>
-                      {columnLabel}:
+                      {columnLabel}
                     </label>
                     {renderField()}
                   </div>

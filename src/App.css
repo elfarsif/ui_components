@@ -1,5 +1,5 @@
 #root {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -42,15 +42,14 @@
 }
  
 .data-display {
-  margin: 1rem 0;
-  padding: 0.75rem;
+  margin: 0.5rem auto;
+  padding: 1rem 1.25rem;
   background-color: white;
-  border: 1px solid #646cff;
-  border-radius: 8px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
   text-align: left;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  max-width: 400px;
 }
  
 .data-display h2 {
@@ -178,35 +177,43 @@
 }
  
 form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
  
 .form-field {
   margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
 .form-field:has(.radio-group) {
-  grid-column: 1 / -1;
+  /* Radio groups already handled */
 }
- 
+
 .form-field label {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0;
   font-weight: 500;
   color: #213547;
-  font-size: 0.875em;
+  font-size: 0.8em;
+}
+
+.form-field label .required-asterisk {
+  color: red;
+  margin-left: 0.25rem;
 }
  
 .form-input {
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.6rem;
   background-color: #f9f9f9;
-  border: 1px solid #646cff;
-  border-radius: 6px;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
   color: #213547;
-  font-size: 0.875em;
+  font-size: 0.8em;
   font-family: inherit;
   transition: border-color 0.25s;
   box-sizing: border-box;
@@ -214,7 +221,7 @@ form {
  
 .form-input:focus {
   outline: none;
-  border-color: #535bf2;
+  border-color: #d0d0d0;
 }
 
 .radio-group {
@@ -243,26 +250,34 @@ form {
   font-size: 0.875em;
 }
 
+.data-display .submit-button,
+form .submit-button,
 .submit-button {
-  padding: 0.5rem 1rem;
-  background-color: #646cff;
-  border: 1px solid #646cff;
-  border-radius: 6px;
+  padding: 0.35rem 0.7rem !important;
+  background-color: #646cff !important;
+  border: none !important;
+  border-radius: 4px;
   color: white;
-  font-size: 0.875em;
+  font-size: 0.8em !important;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: background-color 0.25s, border-color 0.25s;
-  width: auto;
-  grid-column: 2;
-  justify-self: end;
-  align-self: end;
+  transition: background-color 0.25s;
+  width: fit-content !important;
+  min-width: auto !important;
+  align-self: flex-end;
+  margin-top: 0.25rem;
 }
  
 .submit-button:hover {
-  background-color: #535bf2;
-  border-color: #535bf2;
+  background-color: #535bf2 !important;
+  border: none !important;
+}
+
+.submit-button:focus,
+.submit-button:focus-visible {
+  outline: none !important;
+  border: none !important;
 }
  
 .submit-button:active {
@@ -270,15 +285,13 @@ form {
 }
  
 @media (max-width: 768px) {
-  form {
-    grid-template-columns: 1fr;
-  }
+  /* Form is already single column */
 }
  
 @media (prefers-color-scheme: light) {
   .data-display {
     background-color: white;
-    border-color: #646cff;
+    border-color: #d0d0d0;
   }
  
   .columns-preview li {
@@ -315,11 +328,11 @@ form {
   .form-input {
     background-color: #f9f9f9;
     color: #213547;
-    border-color: #646cff;
+    border-color: #d0d0d0;
   }
- 
+
   .form-input:focus {
-    border-color: #535bf2;
+    border-color: #d0d0d0;
   }
 }
  

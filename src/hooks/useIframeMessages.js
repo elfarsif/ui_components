@@ -10,8 +10,8 @@ export function useIframeMessages(onDataReceived) {
 
   useEffect(() => {
     const handleMessage = (event) => {
-      const data = event.data
-
+      const data = event.data;
+      console.log("Message received:", data);
       if (
         data?.type === "ui_component_render" &&
         data?.source === "agentos" &&

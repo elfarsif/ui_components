@@ -119,7 +119,6 @@ function App() {
       <div>
         {originalData && originalData.columns && originalData.rows && originalData.rows.length > 0 && (
           <div className="data-display">
-            <h2>Form</h2>
             <form onSubmit={(e) => {
               e.preventDefault();
               console.log("Form submitted with values:", formValues);

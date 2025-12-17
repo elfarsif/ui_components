@@ -21,15 +21,28 @@ export function useIframeMessages(onDataReceived) {
       ) {
         const payload = data.payload
 
-        // Normalize rows (Agent-safe)
-        const rows =
+        // Normalize rows
+        const baseRows =
           Array.isArray(payload.rows) && payload.rows.length > 0
             ? payload.rows
             : [{}]
 
+        // Read extracted values (support multiple agent conventions)
+        const extractedValues =
+          payload.extracted_values ||
+          payload.extractedValues ||
+          payload.values ||
+          {}
+
+        // Merge extracted values into first row
+        const mergedFirstRow = {
+          ...baseRows[0],
+          ...extractedValues
+        }
+
         const normalizedPayload = {
           ...payload,
-          rows
+          rows: [mergedFirstRow]
         }
 
         setOriginalData(normalizedPayload)
@@ -38,8 +51,7 @@ export function useIframeMessages(onDataReceived) {
         console.log("Columns:", normalizedPayload.columns)
         console.log("Rows:", normalizedPayload.rows)
 
-        // Initialize form values from first row
-        const firstRow = rows[0]
+        // Initialize form values
         const initialValues = {}
 
         normalizedPayload.columns.forEach((col, index) => {
@@ -49,7 +61,9 @@ export function useIframeMessages(onDataReceived) {
               : col.name || col.key || col.field || `column_${index}`
 
           initialValues[columnName] =
-            firstRow[columnName] !== undefined ? firstRow[columnName] : ''
+            mergedFirstRow[columnName] !== undefined
+              ? mergedFirstRow[columnName]
+              : ''
         })
 
         if (onDataReceived) {
@@ -69,4 +83,3 @@ export function useIframeMessages(onDataReceived) {
 
   return { originalData }
 }
-

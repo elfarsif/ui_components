@@ -177,9 +177,9 @@
 }
  
 form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
 }
  
 .form-field {
@@ -190,7 +190,7 @@ form {
 }
 
 .form-field:has(.radio-group) {
-  /* Radio groups already handled */
+  grid-column: 1 / -1;
 }
 
 .form-field label {
@@ -265,7 +265,8 @@ form .submit-button,
   transition: background-color 0.25s;
   width: fit-content !important;
   min-width: auto !important;
-  align-self: flex-end;
+  grid-column: 2;
+  justify-self: end;
   margin-top: 0.25rem;
 }
  

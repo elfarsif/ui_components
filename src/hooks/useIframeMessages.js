@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react'
  * @param {Function} onDataReceived - Callback function called when data is received
  * @returns {Object} - Object containing originalData and setFormValues function
  */
-
 export function useIframeMessages(onDataReceived) {
   const [originalData, setOriginalData] = useState(null)
 
@@ -17,52 +16,37 @@ export function useIframeMessages(onDataReceived) {
       if (
         data?.type === "ui_component_render" &&
         data?.source === "agentos" &&
-        data?.payload?.columns
+        Array.isArray(data?.payload?.columns) &&
+        Array.isArray(data?.payload?.rows)
       ) {
-        const payload = data.payload
+        const { columns, rows } = data.payload
 
-        // Normalize rows
-        const baseRows =
-          Array.isArray(payload.rows) && payload.rows.length > 0
-            ? payload.rows
-            : [{}]
-
-        // Read extracted values (support multiple agent conventions)
-        const extractedValues =
-          payload.extracted_values ||
-          payload.extractedValues ||
-          payload.values ||
-          {}
-
-        // Merge extracted values into first row
-        const mergedFirstRow = {
-          ...baseRows[0],
-          ...extractedValues
-        }
+        // Preserve rows exactly as sent (NO normalization to single row)
+        const normalizedRows = rows.length > 0 ? rows : [{}]
 
         const normalizedPayload = {
-          ...payload,
-          rows: [mergedFirstRow]
+          columns,
+          rows: normalizedRows
         }
 
         setOriginalData(normalizedPayload)
 
         console.log("Normalized payload:", normalizedPayload)
-        console.log("Columns:", normalizedPayload.columns)
-        console.log("Rows:", normalizedPayload.rows)
+        console.log("Columns:", columns)
+        console.log("Rows:", normalizedRows)
 
-        // Initialize form values
+        // Initialize form values from FIRST row only
         const initialValues = {}
 
-        normalizedPayload.columns.forEach((col, index) => {
-          const columnName =
+        columns.forEach((col, index) => {
+          const columnKey =
             typeof col === 'string'
               ? col
-              : col.name || col.key || col.field || `column_${index}`
+              : col.key || col.name || col.field || `column_${index}`
 
-          initialValues[columnName] =
-            mergedFirstRow[columnName] !== undefined
-              ? mergedFirstRow[columnName]
+          initialValues[columnKey] =
+            normalizedRows[0][columnKey] !== undefined
+              ? normalizedRows[0][columnKey]
               : ''
         })
 

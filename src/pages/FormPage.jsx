@@ -3,7 +3,6 @@ import '../App.css'
 import { useIframeMessages } from '../hooks/useIframeMessages'
 
 function FormPage() {
-  const [message, setMessage] = useState("Sample user message from iframe")
   const [formValues, setFormValues] = useState({})
 
   // Receive data from iframe messages
@@ -11,6 +10,23 @@ function FormPage() {
     setFormValues(initialValues)
   })
 
+  /**
+   * Convert form values to readable plain text for chat
+   */
+  const formatFormValuesAsText = (values) => {
+    return Object.entries(values)
+      .map(([key, value]) => {
+        const label = key
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase())
+        return `${label}: ${value}`
+      })
+      .join('\n')
+  }
+
+  /**
+   * Send form submission to parent window
+   */
   const sendFormDataToParent = () => {
     const llmPayload = {
       action: "form_submission",
@@ -27,13 +43,11 @@ function FormPage() {
     window.parent.postMessage(
       {
         type: "ui_component_user_message",
-        message: JSON.stringify(formValues),
-        llmMessage: JSON.stringify(llmPayload)
+        message: formatFormValuesAsText(formValues), 
+        llmMessage: JSON.stringify(llmPayload)      
       },
       "*"
     )
-
-    console.log("Form data sent to parent:", llmPayload)
   }
 
   return (
@@ -43,7 +57,6 @@ function FormPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault()
-              console.log("Form submitted with values:", formValues)
               sendFormDataToParent()
             }}
           >
@@ -54,7 +67,7 @@ function FormPage() {
                   ? col
                   : col.key || col.name || col.field || `column_${index}`
 
-              // Resolve column label
+              // Resolve label
               const columnLabel =
                 typeof col === 'string'
                   ? col
@@ -116,7 +129,9 @@ function FormPage() {
 
               return (
                 <div key={index} className="form-field">
-                  <label htmlFor={`field-${index}`}>{columnLabel}</label>
+                  <label htmlFor={`field-${index}`}>
+                    {columnLabel}
+                  </label>
                   {renderField()}
                 </div>
               )
@@ -128,11 +143,12 @@ function FormPage() {
           </form>
         </div>
       ) : (
-        <p className="waiting-message">Waiting for data from parent window...</p>
+        <p className="waiting-message">
+          Waiting for data from parent window...
+        </p>
       )}
     </div>
   )
 }
 
 export default FormPage
-

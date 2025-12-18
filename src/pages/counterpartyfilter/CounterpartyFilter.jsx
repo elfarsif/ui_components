@@ -1,23 +1,52 @@
 import { useState } from 'react'
 
+const countryCodes = [
+  { code: 'CN', name: 'China' },
+  { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'CH', name: 'Switzerland' },
+  { code: 'AT', name: 'Austria' },
+  { code: 'SE', name: 'Sweden' },
+  { code: 'NO', name: 'Norway' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'KR', name: 'South Korea' },
+  { code: 'IN', name: 'India' },
+  { code: 'BR', name: 'Brazil' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'MX', name: 'Mexico' },
+  { code: 'RU', name: 'Russia' },
+  { code: 'SG', name: 'Singapore' }
+]
+
 function CounterpartyFilter() {
   const [counterpartyName, setCounterpartyName] = useState('')
   const [country, setCountry] = useState('')
-  const [siteId, setSiteId] = useState('')
   const [address, setAddress] = useState('')
-  const [cmrNumber, setCmrNumber] = useState('')
-  const [gbgCeid, setGbgCeid] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
+    // Append country code to address if country is selected
+    let finalAddress = address.trim() || ''
+    if (country) {
+      finalAddress = finalAddress 
+        ? `${finalAddress}, ${country}` 
+        : country
+    }
+
     const dataToSend = {
       counterpartyName: counterpartyName.trim() || '',
-      country: country.trim() || '',
-      siteId: siteId.trim() || '',
-      address: address.trim() || '',
-      cmrNumber: cmrNumber.trim() || '',
-      gbgCeid: gbgCeid.trim() || ''
+      address: finalAddress
     }
 
     // Create LLM payload
@@ -64,26 +93,6 @@ function CounterpartyFilter() {
           />
         </div>
         <div>
-          <label htmlFor="country">Country:</label>
-          <input
-            id="country"
-            type="text"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            placeholder="Enter country"
-          />
-        </div>
-        <div>
-          <label htmlFor="site-id">Site ID:</label>
-          <input
-            id="site-id"
-            type="text"
-            value={siteId}
-            onChange={(e) => setSiteId(e.target.value)}
-            placeholder="Enter site ID"
-          />
-        </div>
-        <div>
           <label htmlFor="address">Address:</label>
           <input
             id="address"
@@ -94,24 +103,19 @@ function CounterpartyFilter() {
           />
         </div>
         <div>
-          <label htmlFor="cmr-number">CMR Number:</label>
-          <input
-            id="cmr-number"
-            type="text"
-            value={cmrNumber}
-            onChange={(e) => setCmrNumber(e.target.value)}
-            placeholder="Enter CMR number"
-          />
-        </div>
-        <div>
-          <label htmlFor="gbg-ceid">GBG CEID:</label>
-          <input
-            id="gbg-ceid"
-            type="text"
-            value={gbgCeid}
-            onChange={(e) => setGbgCeid(e.target.value)}
-            placeholder="Enter GBG CEID"
-          />
+          <label htmlFor="country">Country:</label>
+          <select
+            id="country"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+          >
+            <option value="">Select a country</option>
+            {countryCodes.map((countryOption) => (
+              <option key={countryOption.code} value={countryOption.code}>
+                {countryOption.name} ({countryOption.code})
+              </option>
+            ))}
+          </select>
         </div>
         <button type="submit">
           Submit

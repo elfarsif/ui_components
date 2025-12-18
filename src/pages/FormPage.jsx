@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import '../App.css'
 import { useIframeMessages } from '../hooks/useIframeMessages'
+import DatePicker from '../components/DatePicker'
 
 function FormPage() {
   const [formValues, setFormValues] = useState({})
@@ -43,8 +44,8 @@ function FormPage() {
     window.parent.postMessage(
       {
         type: "ui_component_user_message",
-        message: formatFormValuesAsText(formValues), 
-        llmMessage: JSON.stringify(llmPayload)      
+        message: formatFormValuesAsText(formValues), // plain text for chat
+        llmMessage: JSON.stringify(llmPayload)       // structured JSON for agent
       },
       "*"
     )
@@ -67,14 +68,18 @@ function FormPage() {
                   ? col
                   : col.key || col.name || col.field || `column_${index}`
 
-              // Resolve label
+              // Resolve column label
               const columnLabel =
                 typeof col === 'string'
                   ? col
                   : col.label || col.name || col.key || `Column ${index + 1}`
 
-              // Current value
               const value = formValues[columnKey] ?? ''
+
+              // Detect date fields (schema-safe)
+              const isDateField =
+                columnKey.toLowerCase().includes('date') ||
+                columnLabel.toLowerCase().includes('date')
 
               // Infer dropdown options from rows
               const inferredOptions = Array.from(
@@ -85,9 +90,26 @@ function FormPage() {
                 )
               )
 
-              const isSelect = inferredOptions.length > 1
+              const isSelect = !isDateField && inferredOptions.length > 1
 
               const renderField = () => {
+                // Date picker
+                if (isDateField) {
+                  return (
+                    <DatePicker
+                      id={`field-${index}`}
+                      value={value}
+                      onChange={(dateString) => {
+                        setFormValues({
+                          ...formValues,
+                          [columnKey]: dateString
+                        })
+                      }}
+                    />
+                  )
+                }
+
+                // Dropdown
                 if (isSelect) {
                   return (
                     <select
@@ -110,6 +132,7 @@ function FormPage() {
                   )
                 }
 
+                // Text input (default)
                 return (
                   <input
                     id={`field-${index}`}

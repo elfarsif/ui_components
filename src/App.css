@@ -50,6 +50,8 @@
   text-align: left;
   width: 100%;
   max-width: 400px;
+  position: relative;
+  z-index: 1;
 }
  
 .data-display h2 {
@@ -224,30 +226,346 @@ form {
   border-color: #d0d0d0;
 }
 
-.radio-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.date-picker-wrapper {
+  width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
-.radio-option {
+.date-picker-input-container {
+  position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
+  z-index: 1;
+}
+
+.date-picker-icon {
+  position: absolute;
+  left: 0.6rem;
+  color: #666;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.date-picker-input {
+  padding-left: 2.5rem !important;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  background-color: white;
+}
+
+.date-picker-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  background: white !important;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  z-index: 9999 !important;
+  padding: 0.75rem;
+  min-width: 240px;
+  max-width: 260px;
+  overflow: visible;
+  transform-origin: top left;
+  isolation: isolate;
+}
+
+.date-picker-popover .date-picker {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure year select has proper z-index and positioning */
+.date-picker-header {
+  position: relative;
+  z-index: 1001;
+}
+
+.date-picker-year-select {
+  position: relative;
+  z-index: 1002;
+}
+
+/* Ensure year select dropdown opens downward */
+.date-picker-year-select {
+  position: relative;
+}
+
+.date-picker-year-select option {
+  direction: ltr;
+}
+
+.date-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
   gap: 0.5rem;
 }
 
-.radio-input {
-  width: auto;
-  margin: 0;
-  cursor: pointer;
+.date-picker-header .date-picker-select {
+  flex: 1;
 }
 
-.radio-label {
-  margin: 0;
-  font-weight: normal;
-  cursor: pointer;
+.date-picker-nav-button {
+  background: none;
+  border: none;
+  font-size: 0.875rem;
   color: #213547;
-  font-size: 0.875em;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  line-height: 1;
+  min-width: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-picker-nav-button:hover {
+  background-color: #f0f0f0;
+}
+
+.date-picker-month-year-text {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #213547;
+}
+
+
+.date-picker-select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  background-color: white;
+  color: #213547;
+  font-size: 0.75rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23213547' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.4rem center;
+  padding-right: 1.75rem;
+  position: relative;
+  z-index: 1002;
+}
+
+.date-picker-select {
+  position: static;   
+  z-index: auto;
+}
+
+.date-picker-select:focus {
+  outline: none;
+  border-color: #d0d0d0;
+}
+
+.date-picker-select:active {
+  border-color: #d0d0d0;
+}
+
+.date-picker-select:hover {
+  border-color: #d0d0d0;
+}
+
+.date-picker {
+  width: 100%;
+}
+
+.date-picker .rdp {
+  margin: 0;
+  display: block;
+}
+
+.date-picker .rdp-month_caption {
+  display: none !important;
+}
+
+.date-picker .rdp-caption {
+  display: none !important;
+}
+
+.date-picker .rdp-caption_label {
+  display: none !important;
+}
+
+.date-picker .rdp-nav {
+  display: none !important;
+}
+
+.date-picker .rdp-button_previous,
+.date-picker .rdp-button_next {
+  display: none !important;
+}
+
+.date-picker .rdp-button_reset {
+  display: none !important;
+}
+
+.date-picker .rdp-month {
+  width: 100%;
+  display: block;
+}
+
+.date-picker .rdp-month .rdp-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 0 !important;
+  table-layout: fixed !important;
+  display: table !important;
+  border-spacing: 0 !important;
+}
+
+.date-picker .rdp-tbody {
+  display: table-row-group !important;
+}
+
+.date-picker .rdp-row {
+  display: table-row !important;
+  flex-direction: unset !important;
+  flex-wrap: unset !important;
+  flex: unset !important;
+  display: table-row !important;
+}
+
+.date-picker .rdp-head_row {
+  display: table-row !important;
+  flex-direction: unset !important;
+  flex: unset !important;
+}
+
+.date-picker .rdp-head_cell {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #213547;
+  padding: 0.35rem 0;
+  text-align: center;
+  display: table-cell !important;
+  width: calc(100% / 7) !important;
+  min-width: 0;
+  flex: unset !important;
+  vertical-align: middle;
+}
+
+.date-picker .rdp-cell {
+  display: table-cell !important;
+  text-align: center;
+  vertical-align: middle;
+  width: calc(100% / 7) !important;
+  padding: 0.1rem;
+  min-width: 0;
+  flex: unset !important;
+  position: relative;
+}
+
+.date-picker .rdp-day {
+  font-size: 0.75rem;
+  padding: 0.35rem;
+  border-radius: 4px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  width: 100% !important;
+  max-width: 100%;
+  height: 2rem;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.date-picker .rdp-button {
+  width: 100% !important;
+  height: 100% !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 4px;
+}
+
+
+/* Force table structure - override any flex/grid layouts */
+.date-picker .rdp-month > * {
+  display: block;
+}
+
+.date-picker .rdp-month .rdp-table,
+.date-picker .rdp-month table {
+  display: table !important;
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+}
+
+.date-picker .rdp-month .rdp-tbody,
+.date-picker .rdp-month tbody {
+  display: table-row-group !important;
+}
+
+.date-picker .rdp-month .rdp-row,
+.date-picker .rdp-month tr {
+  display: table-row !important;
+}
+
+.date-picker .rdp-month .rdp-head_row,
+.date-picker .rdp-month thead tr {
+  display: table-row !important;
+}
+
+.date-picker .rdp-month .rdp-head_cell,
+.date-picker .rdp-month th {
+  display: table-cell !important;
+  width: calc(100% / 7) !important;
+}
+
+.date-picker .rdp-month .rdp-cell,
+.date-picker .rdp-month td {
+  display: table-cell !important;
+  width: calc(100% / 7) !important;
+}
+
+.date-picker .rdp-day:hover:not(.rdp-day_disabled):not(.rdp-day_selected):not(.rdp-day_outside) {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.date-picker .rdp-day_selected {
+  background-color: #eef1f6 !important; /* light gray block */
+  color: #1f2430 !important;
+  font-weight: 500;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+.date-picker .rdp-day_selected .rdp-button {
+  color: #1f2430 !important;
+}
+
+.date-picker .rdp-day_selected:hover {
+  background-color: #e1e5ed !important;
+  color: #1f2430 !important;
+}
+
+.date-picker .rdp-day_selected:hover .rdp-button {
+  color: #1f2430 !important;
+}
+
+.date-picker .rdp-day_outside {
+  color: #999;
+}
+
+.date-picker .rdp-day_disabled {
+  color: #ccc;
+  cursor: not-allowed;
 }
 
 .data-display .submit-button,

@@ -2,14 +2,22 @@ import { useState } from 'react'
 
 function CounterpartyFilter() {
   const [counterpartyName, setCounterpartyName] = useState('')
+  const [country, setCountry] = useState('')
+  const [siteId, setSiteId] = useState('')
+  const [address, setAddress] = useState('')
+  const [cmrNumber, setCmrNumber] = useState('')
+  const [gbgCeid, setGbgCeid] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    
-    if (!counterpartyName.trim()) return
 
     const dataToSend = {
-      counterpartyName: counterpartyName.trim()
+      counterpartyName: counterpartyName.trim() || '',
+      country: country.trim() || '',
+      siteId: siteId.trim() || '',
+      address: address.trim() || '',
+      cmrNumber: cmrNumber.trim() || '',
+      gbgCeid: gbgCeid.trim() || ''
     }
 
     // Create LLM payload
@@ -55,7 +63,57 @@ function CounterpartyFilter() {
             placeholder="Enter counterparty name"
           />
         </div>
-        <button type="submit" disabled={!counterpartyName.trim()}>
+        <div>
+          <label htmlFor="country">Country:</label>
+          <input
+            id="country"
+            type="text"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            placeholder="Enter country"
+          />
+        </div>
+        <div>
+          <label htmlFor="site-id">Site ID:</label>
+          <input
+            id="site-id"
+            type="text"
+            value={siteId}
+            onChange={(e) => setSiteId(e.target.value)}
+            placeholder="Enter site ID"
+          />
+        </div>
+        <div>
+          <label htmlFor="address">Address:</label>
+          <input
+            id="address"
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Enter address"
+          />
+        </div>
+        <div>
+          <label htmlFor="cmr-number">CMR Number:</label>
+          <input
+            id="cmr-number"
+            type="text"
+            value={cmrNumber}
+            onChange={(e) => setCmrNumber(e.target.value)}
+            placeholder="Enter CMR number"
+          />
+        </div>
+        <div>
+          <label htmlFor="gbg-ceid">GBG CEID:</label>
+          <input
+            id="gbg-ceid"
+            type="text"
+            value={gbgCeid}
+            onChange={(e) => setGbgCeid(e.target.value)}
+            placeholder="Enter GBG CEID"
+          />
+        </div>
+        <button type="submit">
           Submit
         </button>
       </form>

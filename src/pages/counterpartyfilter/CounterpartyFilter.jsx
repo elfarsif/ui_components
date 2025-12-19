@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import '../../App.css'
 
 const countryCodes = [
   { code: 'CN', name: 'China' },
@@ -80,47 +81,52 @@ function CounterpartyFilter() {
   }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="counterparty-name">Counterparty Name:</label>
-          <input
-            id="counterparty-name"
-            type="text"
-            value={counterpartyName}
-            onChange={(e) => setCounterpartyName(e.target.value)}
-            placeholder="Enter counterparty name"
-          />
-        </div>
-        <div>
-          <label htmlFor="address">Address:</label>
-          <input
-            id="address"
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Enter address"
-          />
-        </div>
-        <div>
-          <label htmlFor="country">Country:</label>
-          <select
-            id="country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          >
-            <option value="">Select a country</option>
-            {countryCodes.map((countryOption) => (
-              <option key={countryOption.code} value={countryOption.code}>
-                {countryOption.name} ({countryOption.code})
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit">
-          Submit
-        </button>
-      </form>
+    <div className="dropdown-container">
+      <div className="data-display">
+        <form onSubmit={handleSubmit}>
+          <div className="form-field">
+            <label htmlFor="counterparty-name">Counterparty Name:</label>
+            <input
+              id="counterparty-name"
+              type="text"
+              value={counterpartyName}
+              onChange={(e) => setCounterpartyName(e.target.value)}
+              placeholder="Enter counterparty name"
+              className="form-input"
+            />
+          </div>
+          <div className="form-field">
+            <label htmlFor="address">Address:</label>
+            <input
+              id="address"
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Enter address"
+              className="form-input"
+            />
+          </div>
+          <div className="form-field">
+            <label htmlFor="country">Country:</label>
+            <select
+              id="country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className="form-input"
+            >
+              <option value="">Select a country</option>
+              {countryCodes.map((countryOption) => (
+                <option key={countryOption.code} value={countryOption.code}>
+                  {countryOption.name} ({countryOption.code})
+                </option>
+              ))}
+            </select>
+          </div>
+          <button type="submit" className="submit-button">
+            Submit
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

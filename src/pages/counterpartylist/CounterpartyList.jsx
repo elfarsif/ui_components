@@ -52,27 +52,78 @@ function CounterpartyList() {
     <div>
       {originalData && originalData.rows && originalData.rows.length > 0 ? (
         <>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {originalData.rows.map((row, index) => (
-              <li
-                key={row.id || index}
-                onClick={() => handleRowClick(row)}
-                style={{
-                  padding: '10px',
-                  margin: '5px 0',
-                  cursor: 'pointer',
-                  backgroundColor: selectedRow?.id === row.id ? '#e0e0e0' : 'transparent',
-                  border: selectedRow?.id === row.id ? '2px solid #646cff' : '1px solid #ccc',
-                  borderRadius: '4px'
-                }}
-              >
-                <strong>{row.name || 'N/A'}</strong>
-                {row.cf_cpAddress && (
-                  <span> - {row.cf_cpAddress}</span>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+            <thead>
+              <tr>
+                {originalData.columns && originalData.columns.length > 0 ? (
+                  originalData.columns.map((col, index) => (
+                    <th
+                      key={col.key || index}
+                      style={{
+                        padding: '12px',
+                        textAlign: 'left',
+                        borderBottom: '2px solid #646cff',
+                        backgroundColor: '#f5f5f5',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {col.label || col.key || `Column ${index + 1}`}
+                    </th>
+                  ))
+                ) : (
+                  <>
+                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #646cff', backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>ID</th>
+                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #646cff', backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>Name</th>
+                    <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #646cff', backgroundColor: '#f5f5f5', fontWeight: 'bold' }}>Address</th>
+                  </>
                 )}
-              </li>
-            ))}
-          </ul>
+              </tr>
+            </thead>
+            <tbody>
+              {originalData.rows.map((row, index) => (
+                <tr
+                  key={row.id || index}
+                  onClick={() => handleRowClick(row)}
+                  style={{
+                    cursor: 'pointer',
+                    backgroundColor: selectedRow?.id === row.id ? '#e0e0e0' : index % 2 === 0 ? '#ffffff' : '#f9f9f9',
+                    borderBottom: '1px solid #ddd',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedRow?.id !== row.id) {
+                      e.currentTarget.style.backgroundColor = '#f0f0f0'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedRow?.id !== row.id) {
+                      e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#ffffff' : '#f9f9f9'
+                    }
+                  }}
+                >
+                  {originalData.columns && originalData.columns.length > 0 ? (
+                    originalData.columns.map((col, colIndex) => (
+                      <td
+                        key={col.key || colIndex}
+                        style={{
+                          padding: '12px',
+                          borderBottom: '1px solid #ddd'
+                        }}
+                      >
+                        {row[col.key] || 'N/A'}
+                      </td>
+                    ))
+                  ) : (
+                    <>
+                      <td style={{ padding: '12px', borderBottom: '1px solid #ddd' }}>{row.id || 'N/A'}</td>
+                      <td style={{ padding: '12px', borderBottom: '1px solid #ddd' }}>{row.name || 'N/A'}</td>
+                      <td style={{ padding: '12px', borderBottom: '1px solid #ddd' }}>{row.cf_cpAddress || 'N/A'}</td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
           <button
             type="button"
             onClick={handleSubmit}

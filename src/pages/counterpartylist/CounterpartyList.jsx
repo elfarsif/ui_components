@@ -85,90 +85,218 @@ function CounterpartyList() {
 
   const columns = getColumns()
 
+  // Extract country code from address (typically at the end, e.g., "CN", "US")
+  const getCountryCode = (row) => {
+    const address = row.cf_cpAddress || row.address || ''
+    // Try to extract country code from the end of the address
+    // Common pattern: address ends with country code like "CN", "US", etc.
+    const parts = address.trim().split(/\s+/)
+    if (parts.length > 0) {
+      const lastPart = parts[parts.length - 1]
+      // Check if it's a 2-letter uppercase code (country code pattern)
+      if (lastPart && lastPart.length === 2 && /^[A-Z]{2}$/.test(lastPart)) {
+        return lastPart
+      }
+    }
+    // Fallback: check if there's a country field
+    if (row.country) return row.country
+    return ''
+  }
+
+  // Get the primary name field and description field
+  const getNameField = (row) => {
+    if (row.name) return row.name
+    const columns = getColumns()
+    if (columns.length > 0) {
+      const firstCol = columns[0]
+      return row[firstCol.key] || 'N/A'
+    }
+    return 'N/A'
+  }
+
+  const getDescriptionField = (row) => {
+    if (row.cf_cpAddress) return row.cf_cpAddress
+    if (row.address) return row.address
+    const columns = getColumns()
+    if (columns.length > 1) {
+      const secondCol = columns[1]
+      return row[secondCol.key] || ''
+    }
+    return ''
+  }
+
+  const getIdField = (row) => {
+    if (row.id) return row.id
+    const columns = getColumns()
+    if (columns.length > 0) {
+      const firstCol = columns[0]
+      return row[firstCol.key] || ''
+    }
+    return ''
+  }
+
   return (
     <div>
       {originalData && originalData.rows && originalData.rows.length > 0 ? (
-        <>
-          {columns.length > 0 ? (
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
-              <thead>
-                <tr>
-                  {columns.map((col, index) => (
-                    <th
-                      key={col.key || index}
+        <div
+          style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            padding: '1.5rem',
+            maxWidth: '100%'
+          }}
+        >
+          {/* Header */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+              <h2 style={{ margin: 0, fontSize: '1.1em', fontWeight: 'bold', color: '#213547' }}>
+                Counterparties
+              </h2>
+              <span
+                style={{
+                  backgroundColor: '#f5f5f5',
+                  color: '#666',
+                  fontSize: '0.65em',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '12px',
+                  fontWeight: 'normal'
+                }}
+              >
+                preview
+              </span>
+            </div>
+          </div>
+
+          {/* List Items */}
+          <div>
+            {originalData.rows.map((row, index) => {
+              const isSelected = isRowSelected(row, index)
+              const countryCode = getCountryCode(row)
+              const name = getNameField(row)
+              const description = getDescriptionField(row)
+              const id = getIdField(row)
+
+              return (
+                <div
+                  key={getRowKey(row, index)}
+                  onClick={() => handleRowClick(row)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '1rem 0',
+                    cursor: 'pointer',
+                    borderBottom: index < originalData.rows.length - 1 ? '1px solid #e0e0e0' : 'none',
+                    backgroundColor: isSelected ? '#f5f5f5' : 'transparent',
+                    transition: 'background-color 0.2s',
+                    borderRadius: '4px',
+                    margin: '0 -0.5rem',
+                    paddingLeft: '0.5rem',
+                    paddingRight: '0.5rem'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = '#fafafa'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }
+                  }}
+                  >
+                  {/* ID Block */}
+                  {id && (
+                    <div
                       style={{
-                        padding: '12px',
-                        textAlign: 'left',
-                        borderBottom: '2px solid #646cff',
-                        backgroundColor: '#f5f5f5',
-                        fontWeight: 'bold',
-                        fontSize: '0.6em'
+                        minWidth: '40px',
+                        marginRight: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
                       }}
                     >
-                      {col.label || col.key || `Column ${index + 1}`}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {originalData.rows.map((row, index) => {
-                  const isSelected = isRowSelected(row, index)
-                  return (
-                    <tr
-                      key={getRowKey(row, index)}
-                      onClick={() => handleRowClick(row)}
+                      <div
+                        style={{
+                          fontSize: '0.75em',
+                          color: '#213547',
+                          fontWeight: '600',
+                          lineHeight: '1'
+                        }}
+                      >
+                        {id}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Name and Description */}
+                  <div
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      marginRight: '1rem'
+                    }}
+                  >
+                    <div
                       style={{
-                        cursor: 'pointer',
-                        backgroundColor: isSelected ? '#e0e0e0' : index % 2 === 0 ? '#ffffff' : '#f9f9f9',
-                        borderBottom: '1px solid #ddd',
-                        transition: 'background-color 0.2s'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isSelected) {
-                          e.currentTarget.style.backgroundColor = '#f0f0f0'
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isSelected) {
-                          e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#ffffff' : '#f9f9f9'
-                        }
+                        fontSize: '0.75em',
+                        color: '#213547',
+                        fontWeight: '600',
+                        marginBottom: '0.25rem',
+                        lineHeight: '1.3'
                       }}
                     >
-                      {columns.map((col, colIndex) => (
-                        <td
-                          key={col.key || colIndex}
-                          style={{
-                            padding: '12px',
-                            borderBottom: '1px solid #ddd',
-                            fontSize: '0.6em'
-                          }}
-                        >
-                          {row[col.key] !== undefined && row[col.key] !== null && row[col.key] !== '' 
-                            ? String(row[col.key]) 
-                            : 'N/A'}
-                        </td>
-                      ))}
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          ) : (
-            <p style={{ fontSize: '0.6em' }}>No columns defined in data</p>
-          )}
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!selectedRow}
-            className="submit-button"
-            style={{
-              backgroundColor: selectedRow ? '#646cff' : '#ccc',
-              cursor: selectedRow ? 'pointer' : 'not-allowed'
-            }}
-          >
-            Submit
-          </button>
-        </>
+                      {name}
+                    </div>
+                    {description && (
+                      <div
+                        style={{
+                          fontSize: '0.65em',
+                          color: '#999',
+                          fontWeight: 'normal',
+                          lineHeight: '1.3'
+                        }}
+                      >
+                        {description}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Country Code/Right side */}
+                  {countryCode && (
+                    <div
+                      style={{
+                        fontSize: '0.7em',
+                        color: '#666',
+                        fontWeight: 'normal',
+                        textAlign: 'right',
+                        minWidth: '80px'
+                      }}
+                    >
+                      {countryCode}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Submit Button */}
+          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!selectedRow}
+              className="submit-button"
+              style={{
+                backgroundColor: selectedRow ? '#646cff' : '#ccc',
+                cursor: selectedRow ? 'pointer' : 'not-allowed'
+              }}
+            >
+              Submit
+            </button>
+          </div>
+        </div>
       ) : (
         <p className="waiting-message">Waiting for data from parent window...</p>
       )}

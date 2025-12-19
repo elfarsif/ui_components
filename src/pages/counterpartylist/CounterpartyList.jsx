@@ -95,6 +95,7 @@ function CounterpartyList() {
       message: formatFormValuesAsText(dataToSend),
       llmMessage: llmPayload
     })
+    window.parent.postMessage({ type: 'ui_component_close' }, '*')
   }
 
   const columns = getColumns()

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useIframeMessages } from './counterpartyListIframeHook'
+import '../../App.css'
 
 function CounterpartyList() {
   const { originalData } = useIframeMessages()
@@ -100,7 +101,8 @@ function CounterpartyList() {
                         textAlign: 'left',
                         borderBottom: '2px solid #646cff',
                         backgroundColor: '#f5f5f5',
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
+                        fontSize: '0.6em'
                       }}
                     >
                       {col.label || col.key || `Column ${index + 1}`}
@@ -137,7 +139,8 @@ function CounterpartyList() {
                           key={col.key || colIndex}
                           style={{
                             padding: '12px',
-                            borderBottom: '1px solid #ddd'
+                            borderBottom: '1px solid #ddd',
+                            fontSize: '0.6em'
                           }}
                         >
                           {row[col.key] !== undefined && row[col.key] !== null && row[col.key] !== '' 
@@ -151,19 +154,15 @@ function CounterpartyList() {
               </tbody>
             </table>
           ) : (
-            <p>No columns defined in data</p>
+            <p style={{ fontSize: '0.6em' }}>No columns defined in data</p>
           )}
           <button
             type="button"
             onClick={handleSubmit}
             disabled={!selectedRow}
+            className="submit-button"
             style={{
-              marginTop: '20px',
-              padding: '10px 20px',
               backgroundColor: selectedRow ? '#646cff' : '#ccc',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
               cursor: selectedRow ? 'pointer' : 'not-allowed'
             }}
           >
@@ -171,7 +170,7 @@ function CounterpartyList() {
           </button>
         </>
       ) : (
-        <p>Waiting for data from parent window...</p>
+        <p className="waiting-message">Waiting for data from parent window...</p>
       )}
     </div>
   )

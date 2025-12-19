@@ -26,14 +26,36 @@ function FormPage() {
   }
 
   /**
+   * Normalize values before submit:
+   * - Empty date fields → "N/A"
+   */
+  const normalizeFormValuesForSubmit = (values) => {
+    const normalized = {}
+
+    Object.entries(values).forEach(([key, value]) => {
+      const isDateField = key.toLowerCase().includes('date')
+
+      if (isDateField && (!value || value === '')) {
+        normalized[key] = 'N/A'
+      } else {
+        normalized[key] = value
+      }
+    })
+
+    return normalized
+  }
+
+  /**
    * Send form submission to parent window
    */
   const sendFormDataToParent = () => {
+    const normalizedValues = normalizeFormValuesForSubmit(formValues)
+
     const llmPayload = {
       action: "form_submission",
       timestamp: new Date().toISOString(),
       data: {
-        formFields: formValues,
+        formFields: normalizedValues,
         metadata: {
           source: "iframe_component",
           version: "1.0.0"
@@ -44,8 +66,8 @@ function FormPage() {
     window.parent.postMessage(
       {
         type: "ui_component_user_message",
-        message: formatFormValuesAsText(formValues), // plain text for chat
-        llmMessage: JSON.stringify(llmPayload)       // structured JSON for agent
+        message: formatFormValuesAsText(normalizedValues), // plain text
+        llmMessage: JSON.stringify(llmPayload)             // structured JSON
       },
       "*"
     )
@@ -74,12 +96,19 @@ function FormPage() {
                   ? col
                   : col.label || col.name || col.key || `Column ${index + 1}`
 
-              const value = formValues[columnKey] ?? ''
-
-              // Detect date fields (schema-safe)
+              // Detect date fields
               const isDateField =
                 columnKey.toLowerCase().includes('date') ||
                 columnLabel.toLowerCase().includes('date')
+
+              // Raw value from form state
+              const rawValue = formValues[columnKey]
+
+              // NEVER pass "N/A" to DatePicker
+              const value =
+                isDateField && (rawValue === 'N/A' || rawValue === undefined || rawValue === null)
+                  ? ''
+                  : rawValue ?? ''
 
               // Infer dropdown options from rows
               const inferredOptions = Array.from(
@@ -96,33 +125,33 @@ function FormPage() {
                 // Date picker
                 if (isDateField) {
                   return (
-                    <DatePicker
-                      id={`field-${index}`}
-                      value={value}
-                      onChange={(dateString) => {
-                        setFormValues({
-                          ...formValues,
-                          [columnKey]: dateString
-                        })
-                      }}
-                    />
+                  <DatePicker
+                    id={`field-${index}`}
+                    value={value}
+                    onChange={(dateString) => {
+                      setFormValues((prev) => ({
+                        ...prev,
+                        [columnKey]: dateString
+                      }))
+                    }}
+                  />
                   )
                 }
 
                 // Dropdown
                 if (isSelect) {
                   return (
-                    <select
-                      id={`field-${index}`}
-                      value={value}
-                      onChange={(e) =>
-                        setFormValues({
-                          ...formValues,
-                          [columnKey]: e.target.value
-                        })
-                      }
-                      className="form-input"
-                    >
+                  <select
+                    id={`field-${index}`}
+                    value={value}
+                    onChange={(e) =>
+                      setFormValues((prev) => ({
+                        ...prev,
+                        [columnKey]: e.target.value
+                      }))
+                    }
+                    className="form-input"
+                  >
                       {inferredOptions.map((opt, optIndex) => (
                         <option key={optIndex} value={opt}>
                           {opt}
@@ -132,17 +161,17 @@ function FormPage() {
                   )
                 }
 
-                // Text input (default)
+                // Text input
                 return (
                   <input
                     id={`field-${index}`}
                     type="text"
                     value={value}
                     onChange={(e) =>
-                      setFormValues({
-                        ...formValues,
+                      setFormValues((prev) => ({
+                        ...prev,
                         [columnKey]: e.target.value
-                      })
+                      }))
                     }
                     className="form-input"
                     placeholder={`Enter ${columnLabel.toLowerCase()}`}

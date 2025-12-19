@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { DayPicker } from 'react-day-picker'
 import '../App.css'
 import 'react-day-picker/dist/style.css'
@@ -18,13 +19,16 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
   const wrapperRef = useRef(null)
   const popoverRef = useRef(null)
 
-  // Convert string value to Date object
-  const selectedDate = value ? new Date(value) : undefined
+  const parseDate = (dateString) =>
+    dateString ? new Date(`${dateString}T00:00:00`) : undefined
+
+  // Convert string value to Date object (normalize to local midnight to avoid TZ shifts)
+  const selectedDate = parseDate(value)
 
   // Format date for display
   const formatDisplayDate = (dateString) => {
     if (!dateString) return ''
-    const date = new Date(dateString)
+    const date = parseDate(dateString)
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: '2-digit', 
@@ -32,97 +36,85 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
     })
   }
 
+  const formatLocalISODate = (date) => {
+    if (!date) return ''
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   // Handle date selection
   const handleSelect = (date) => {
-    const dateString = date ? date.toISOString().split('T')[0] : ''
+    const dateString = formatLocalISODate(date)
     onChange(dateString)
     setIsOpen(false) // Close calendar after selection
   }
 
+  const adjustPopoverPosition = useCallback(() => {
+    if (!isOpen || !wrapperRef.current) return
+
+    const inputRect = wrapperRef.current.getBoundingClientRect()
+    const viewportHeight = window.innerHeight
+    const viewportWidth = window.innerWidth
+    const popoverWidth = popoverRef.current?.offsetWidth || 220
+
+    // Reserve space so dropdowns open downward
+    const requiredSpaceBelow = 320
+    const defaultTop = inputRect.top + inputRect.height + 4
+    const maxTop = Math.max(8, viewportHeight - requiredSpaceBelow)
+    const topPosition = Math.min(defaultTop, maxTop)
+
+    const minLeft = 8
+    const maxLeft = Math.max(minLeft, viewportWidth - popoverWidth - 8)
+    const leftPosition = Math.min(Math.max(inputRect.left, minLeft), maxLeft)
+
+    setPopoverStyle({
+      position: 'fixed',
+      top: `${topPosition}px`,
+      left: `${leftPosition}px`,
+      marginTop: 0,
+      marginBottom: 0
+    })
+  }, [isOpen])
+
   // Adjust popover position to ensure dropdowns open downward
   useEffect(() => {
-    if (isOpen && popoverRef.current && wrapperRef.current) {
-      const inputRect = wrapperRef.current.getBoundingClientRect()
-      const viewportHeight = window.innerHeight
-      const spaceBelow = viewportHeight - inputRect.bottom
-      
-      // Need at least 350px below for dropdowns to open downward
-      // If not enough space, use fixed positioning to ensure space
-      if (spaceBelow < 350) {
-        const topPosition = inputRect.top + inputRect.height + 4
-        setPopoverStyle({ 
-          position: 'fixed',
-          top: `${topPosition}px`,
-          left: `${inputRect.left}px`,
-          marginTop: 0,
-          marginBottom: 0
-        })
-      } else {
-        setPopoverStyle({
-          position: 'absolute',
-          top: '100%',
-          bottom: 'auto',
-          left: 0,
-          marginTop: '0.25rem',
-          marginBottom: 0
-        })
-      }
+    if (isOpen) {
+      adjustPopoverPosition()
     }
-  }, [isOpen, month])
+  }, [isOpen, month, adjustPopoverPosition])
 
   // Handle click outside to close calendar
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setIsOpen(false)
-      }
-    }
+      const clickedInsideInput =
+        wrapperRef.current && wrapperRef.current.contains(event.target)
+      const clickedInsidePopover =
+        popoverRef.current && popoverRef.current.contains(event.target)
 
-    const recalculatePosition = () => {
-      if (isOpen && popoverRef.current && wrapperRef.current) {
-        const inputRect = wrapperRef.current.getBoundingClientRect()
-        const viewportHeight = window.innerHeight
-        const spaceBelow = viewportHeight - inputRect.bottom
-        
-        if (spaceBelow < 350) {
-          const topPosition = inputRect.top + inputRect.height + 4
-          setPopoverStyle({ 
-            position: 'fixed',
-            top: `${topPosition}px`,
-            left: `${inputRect.left}px`,
-            marginTop: 0,
-            marginBottom: 0
-          })
-        } else {
-          setPopoverStyle({
-            position: 'absolute',
-            top: '100%',
-            bottom: 'auto',
-            left: 0,
-            marginTop: '0.25rem',
-            marginBottom: 0
-          })
-        }
+      if (!clickedInsideInput && !clickedInsidePopover) {
+        setIsOpen(false)
       }
     }
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
-      window.addEventListener('scroll', recalculatePosition, true)
-      window.addEventListener('resize', recalculatePosition)
+      window.addEventListener('scroll', adjustPopoverPosition, true)
+      window.addEventListener('resize', adjustPopoverPosition)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      window.removeEventListener('scroll', recalculatePosition, true)
-      window.removeEventListener('resize', recalculatePosition)
+      window.removeEventListener('scroll', adjustPopoverPosition, true)
+      window.removeEventListener('resize', adjustPopoverPosition)
     }
-  }, [isOpen])
+  }, [isOpen, adjustPopoverPosition])
 
   // Update month when value changes
   useEffect(() => {
     if (value) {
-      setMonth(new Date(value))
+      setMonth(parseDate(value))
     }
   }, [value])
 
@@ -196,79 +188,79 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
           className="date-picker-input form-input"
         />
       </div>
-      {isOpen && (
-        <>
+      {isOpen &&
+        createPortal(
           <div className="date-picker-popover" ref={popoverRef} style={popoverStyle}>
             <div className="date-picker-header">
-            <button
-              type="button"
-              className="date-picker-nav-button"
-              onClick={() => {
-                const newMonth = new Date(month)
-                newMonth.setMonth(month.getMonth() - 1)
-                setMonth(newMonth)
+              <button
+                type="button"
+                className="date-picker-nav-button"
+                onClick={() => {
+                  const newMonth = new Date(month)
+                  newMonth.setMonth(month.getMonth() - 1)
+                  setMonth(newMonth)
+                }}
+                aria-label="Previous month"
+              >
+                &lt;
+              </button>
+              <select
+                className="date-picker-select"
+                value={month.getMonth()}
+                onChange={handleMonthChange}
+              >
+                {months.map((monthName, index) => (
+                  <option key={index} value={index}>
+                    {monthName}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="date-picker-select date-picker-year-select"
+                value={month.getFullYear()}
+                onChange={handleYearChange}
+                style={{ 
+                  direction: 'ltr',
+                  position: 'relative',
+                  zIndex: 1001
+                }}
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="date-picker-nav-button"
+                onClick={() => {
+                  const newMonth = new Date(month)
+                  newMonth.setMonth(month.getMonth() + 1)
+                  setMonth(newMonth)
+                }}
+                aria-label="Next month"
+              >
+                &gt;
+              </button>
+            </div>
+            <DayPicker
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleSelect}
+              month={month}
+              onMonthChange={setMonth}
+              className="date-picker"
+              showOutsideDays
+              components={{
+                Caption: () => null,
+                IconLeft: () => null,
+                IconRight: () => null,
               }}
-              aria-label="Previous month"
-            >
-              &lt;
-            </button>
-            <select
-              className="date-picker-select"
-              value={month.getMonth()}
-              onChange={handleMonthChange}
-            >
-              {months.map((monthName, index) => (
-                <option key={index} value={index}>
-                  {monthName}
-                </option>
-              ))}
-            </select>
-            <select
-              className="date-picker-select date-picker-year-select"
-              value={month.getFullYear()}
-              onChange={handleYearChange}
-              style={{ 
-                direction: 'ltr',
-                position: 'relative',
-                zIndex: 1001
-              }}
-            >
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className="date-picker-nav-button"
-              onClick={() => {
-                const newMonth = new Date(month)
-                newMonth.setMonth(month.getMonth() + 1)
-                setMonth(newMonth)
-              }}
-              aria-label="Next month"
-            >
-              &gt;
-            </button>
-          </div>
-          <DayPicker
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleSelect}
-            month={month}
-            onMonthChange={setMonth}
-            className="date-picker"
-            showOutsideDays
-            components={{
-              Caption: () => null,
-              IconLeft: () => null,
-              IconRight: () => null,
-            }}
-          />
-        </div>
-        </>
-      )}
+            />
+          </div>,
+          document.body
+        )}
     </div>
   )
 }

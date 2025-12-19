@@ -228,8 +228,8 @@ form {
 
 .date-picker-wrapper {
   width: 100%;
-  position: relative;
-  z-index: 1;
+  position: static;
+  z-index: auto;
 }
 
 .date-picker-input-container {
@@ -257,7 +257,7 @@ form {
 }
 
 .date-picker-popover {
-  position: absolute;
+  position: fixed !important;
   top: 100%;
   left: 0;
   margin-top: 0.25rem;
@@ -265,13 +265,14 @@ form {
   border: 1px solid #d0d0d0;
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-  z-index: 9999 !important;
-  padding: 0.75rem;
-  min-width: 240px;
-  max-width: 260px;
+  z-index: 2147483647 !important;
+  padding: 0.5rem;
+  min-width: 200px;
+  max-width: 220px;
   overflow: visible;
   transform-origin: top left;
   isolation: isolate;
+  pointer-events: auto;
 }
 
 .date-picker-popover .date-picker {
@@ -303,8 +304,8 @@ form {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
-  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  gap: 0.35rem;
 }
 
 .date-picker-header .date-picker-select {
@@ -314,14 +315,14 @@ form {
 .date-picker-nav-button {
   background: none;
   border: none;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: #213547;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 4px;
   transition: background-color 0.2s;
   line-height: 1;
-  min-width: 2rem;
+  min-width: 1.6rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -334,25 +335,25 @@ form {
 .date-picker-month-year-text {
   flex: 1;
   text-align: center;
-  font-weight: 600;
-  font-size: 0.875rem;
+  font-weight: 400;
+  font-size: 0.75rem;
   color: #213547;
 }
 
 
 .date-picker-select {
-  padding: 0.3rem 0.5rem;
+  padding: 0.25rem 0.4rem;
   border: 1px solid #d0d0d0;
-  border-radius: 4px;
   background-color: white;
+  border-radius: 4px;
   color: #213547;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23213547' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.4rem center;
-  padding-right: 1.75rem;
+  background-position: right 0.35rem center;
+  padding-right: 1.4rem;
   position: relative;
   z-index: 1002;
 }
@@ -377,11 +378,14 @@ form {
 
 .date-picker {
   width: 100%;
+  --rdp-accent-color: transparent;
+  --rdp-accent-background-color: transparent;
 }
 
 .date-picker .rdp {
   margin: 0;
   display: block;
+  background: white;
 }
 
 .date-picker .rdp-month_caption {
@@ -442,16 +446,26 @@ form {
 }
 
 .date-picker .rdp-head_cell {
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.5rem;
+  font-weight: 200;
+  font-style: normal;
+  font-family: inherit;
   color: #213547;
-  padding: 0.35rem 0;
+  padding: 0.2rem 0;
   text-align: center;
   display: table-cell !important;
   width: calc(100% / 7) !important;
   min-width: 0;
   flex: unset !important;
   vertical-align: middle;
+}
+
+.date-picker .rdp-weekday {
+  font-size: 0.7rem;
+  font-weight: 500;
+  font-style: normal;
+  font-family: inherit;
+  color: #213547;
 }
 
 .date-picker .rdp-cell {
@@ -459,23 +473,22 @@ form {
   text-align: center;
   vertical-align: middle;
   width: calc(100% / 7) !important;
-  padding: 0.1rem;
+  padding: 0.05rem;
   min-width: 0;
   flex: unset !important;
   position: relative;
 }
 
 .date-picker .rdp-day {
-  font-size: 0.75rem;
-  padding: 0.35rem;
-  border-radius: 4px;
+  font-size: 0.7rem;
+  padding: 0.2rem;
   transition: background-color 0.2s, box-shadow 0.2s;
   width: 100% !important;
   max-width: 100%;
-  height: 2rem;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
+  height: 1.6rem;
+  display: grid !important;
+  place-items: center;
+  text-align: center;
   margin: 0 auto;
   box-sizing: border-box;
   position: relative;
@@ -484,12 +497,24 @@ form {
 .date-picker .rdp-button {
   width: 100% !important;
   height: 100% !important;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
+  display: grid !important;
+  place-items: center;
+  text-align: center;
+  line-height: 1.1;
   margin: 0 !important;
   padding: 0 !important;
-  border-radius: 4px;
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: #213547 !important;
+}
+
+.date-picker .rdp-day_button,
+.date-picker .rdp-day .rdp-button {
+  background: transparent !important;
+  color: #213547 !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 
@@ -538,25 +563,51 @@ form {
   border-radius: 4px;
 }
 
+.date-picker .rdp-button:hover,
+.date-picker .rdp-button:focus,
+.date-picker .rdp-button:focus-visible,
+.date-picker .rdp-day:hover .rdp-button,
+.date-picker .rdp-day:focus .rdp-button {
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
 .date-picker .rdp-day_selected {
-  background-color: #eef1f6 !important; /* light gray block */
-  color: #1f2430 !important;
-  font-weight: 500;
+  background-color: #646cff !important;
+  color: #fff !important;
+  font-weight: 600;
   border-radius: 6px !important;
   box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
 }
 
 .date-picker .rdp-day_selected .rdp-button {
-  color: #1f2430 !important;
+  color: #fff !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: #646cff !important;
+  border-radius: 6px !important;
 }
 
 .date-picker .rdp-day_selected:hover {
-  background-color: #e1e5ed !important;
-  color: #1f2430 !important;
+  background-color: #535bf2 !important;
+  color: #fff !important;
 }
 
 .date-picker .rdp-day_selected:hover .rdp-button {
-  color: #1f2430 !important;
+  color: #fff !important;
+  background: #535bf2 !important;
+}
+
+.date-picker .rdp-button:focus-visible,
+.date-picker .rdp-button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .date-picker .rdp-day_outside {

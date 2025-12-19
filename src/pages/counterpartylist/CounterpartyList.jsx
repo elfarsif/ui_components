@@ -47,6 +47,20 @@ function CounterpartyList() {
     setSelectedRow(row)
   }
 
+  /**
+   * Convert form values to readable plain text for chat
+   */
+  const formatFormValuesAsText = (values) => {
+    return Object.entries(values)
+      .map(([key, value]) => {
+        const label = key
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase())
+        return `${label}: ${value}`
+      })
+      .join('\n')
+  }
+
   const handleSubmit = () => {
     if (!selectedRow) return
 
@@ -70,15 +84,15 @@ function CounterpartyList() {
     window.parent.postMessage(
       {
         type: "ui_component_user_message",
-        message: JSON.stringify(dataToSend),
-        llmMessage: JSON.stringify(llmPayload)
+        message: formatFormValuesAsText(dataToSend), // plain text
+        llmMessage: JSON.stringify(llmPayload)       // structured JSON
       },
       "*"
     )
 
     console.log("Data sent to parent:", {
       type: "ui_component_user_message",
-      message: dataToSend,
+      message: formatFormValuesAsText(dataToSend),
       llmMessage: llmPayload
     })
   }

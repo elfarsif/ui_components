@@ -1,16 +1,44 @@
-# React + Vite
+# UI Components App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React application containing reusable UI components designed to work within iframes. Components communicate with parent windows via postMessage API and can receive data payloads to render dynamic forms, dropdowns, and data tables.
 
-Currently, two official plugins are available:
+## Structure
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```
+src/
+├── components/          # Reusable components
+│   └── DatePicker.jsx  # Date picker component
+├── hooks/              # Shared React hooks
+│   └── useIframeMessages.js  # Hook for handling iframe messages
+├── pages/              # Page components
+│   ├── FormPage.jsx    # Dynamic form generator
+│   ├── Dropdown.jsx    # Dropdown selection component
+│   ├── hello/          # Hello World example page
+│   ├── counterpartyfilter/  # Counterparty search filter
+│   └── counterpartylist/   # Counterparty list with table view
+└── App.css             # Shared styles
+```
 
-## React Compiler
+## Routes
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `/` - Home page
+- `/form` - Dynamic form page (generates forms from payload data)
+- `/hello` - Hello World example page
+- `/counterpartyfilter` - Counterparty search filter form
+- `/counterpartylist` - Counterparty list with selectable table
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Iframe Communication**: Components receive data via `postMessage` and send responses back to parent windows
+- **Dynamic Forms**: FormPage automatically generates form fields based on column definitions
+- **Data Tables**: CounterpartyList displays data in a flexible table format
+- **Date Picker**: Custom date picker component for date fields
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+The app runs on `http://localhost:5173/ui_components/` (base path configured in `vite.config.js`).

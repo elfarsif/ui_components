@@ -34,6 +34,13 @@ function CounterpartyFilter() {
   const [country, setCountry] = useState('')
   const [address, setAddress] = useState('')
 
+  const formatAsPlainText = ({ counterpartyName, address }) => {
+    const lines = []
+    if (counterpartyName) lines.push(`Counterparty Name: ${counterpartyName}`)
+    if (address) lines.push(`Address: ${address}`)
+    return lines.join('\n')
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
 
@@ -67,7 +74,7 @@ function CounterpartyFilter() {
     window.parent.postMessage(
       {
         type: "ui_component_user_message",
-        message: JSON.stringify(dataToSend),
+        message: formatAsPlainText(dataToSend), // plain text
         llmMessage: JSON.stringify(llmPayload)
       },
       "*"

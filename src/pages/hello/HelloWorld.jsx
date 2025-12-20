@@ -6,46 +6,54 @@ function HelloWorld() {
   const [selectedName, setSelectedName] = useState('')
   const { originalData } = useIframeMessages()
 
-  // Extract names from the rows array
+  /**
+   * Extract unique names from rows
+   */
   const getNames = () => {
-    if (!originalData || !originalData.rows || !Array.isArray(originalData.rows) || originalData.rows.length === 0) {
+    if (
+      !originalData ||
+      !Array.isArray(originalData.rows) ||
+      originalData.rows.length === 0
+    ) {
       return []
     }
 
-    // Extract names from rows array (each item has a "name" property)
     const names = originalData.rows
       .map(item => item.name)
-      .filter(name => name !== undefined && name !== null && name !== '')
-    
-    // Remove duplicates
+      .filter(name => name && typeof name === 'string')
+
     return [...new Set(names)]
   }
 
-  // Get the id for the selected name
+  /**
+   * Get ID for selected name
+   */
   const getSelectedId = () => {
-    if (!selectedName || !originalData || !originalData.rows || !Array.isArray(originalData.rows)) {
-      return null
-    }
+    if (!selectedName || !originalData?.rows) return null
 
-    // Find the item with the selected name
-    const selectedItem = originalData.rows.find(item => item.name === selectedName)
-    return selectedItem ? selectedItem.id : null
+    const selectedItem = originalData.rows.find(
+      item => item.name === selectedName
+    )
+
+    return selectedItem?.id || null
   }
 
+  /**
+   * Send selection back to parent
+   * - message → plain text (chat)
+   * - llmMessage → structured JSON (agent)
+   */
   const sendDataToParent = () => {
     if (!selectedName) return
 
     const selectedId = getSelectedId()
-    const dataToSend = {
-      id: selectedId
-    }
 
-    // Create LLM payload
     const llmPayload = {
       action: "name_selection",
       timestamp: new Date().toISOString(),
       data: {
-        ...dataToSend,
+        id: selectedId,
+        name: selectedName,
         metadata: {
           source: "iframe_component",
           version: "1.0.0"
@@ -53,21 +61,14 @@ function HelloWorld() {
       }
     }
 
-    // Send data to parent
     window.parent.postMessage(
       {
         type: "ui_component_user_message",
-        message: JSON.stringify(dataToSend),
+        message: selectedName, //  plain text only
         llmMessage: JSON.stringify(llmPayload)
       },
       "*"
     )
-
-    console.log("Data sent to parent:", {
-      type: "ui_component_user_message",
-      message: dataToSend,
-      llmMessage: llmPayload
-    })
   }
 
   const names = getNames()
@@ -76,21 +77,23 @@ function HelloWorld() {
     <div className="hello-world-container">
       {originalData ? (
         <div className="dropdown-container">
-          <label htmlFor="name-dropdown">Select a name:</label>
+          <label htmlFor="name-dropdown">Select a Workflow:</label>
+
           <select
             id="name-dropdown"
             value={selectedName}
             onChange={(e) => setSelectedName(e.target.value)}
             className="name-dropdown"
           >
-            <option value="">-- Select a name --</option>
+            <option value="">-- Select a Workflow --</option>
             {names.map((name, index) => (
               <option key={index} value={name}>
                 {name}
               </option>
             ))}
           </select>
-          <button 
+
+          <button
             type="button"
             onClick={sendDataToParent}
             disabled={!selectedName}
@@ -100,11 +103,12 @@ function HelloWorld() {
           </button>
         </div>
       ) : (
-        <p className="waiting-message">Waiting for data from parent window...</p>
+        <p className="waiting-message">
+          Waiting for data from parent window...
+        </p>
       )}
     </div>
   )
 }
 
 export default HelloWorld
-

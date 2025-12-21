@@ -7,6 +7,7 @@ import FormPage from './pages/FormPage.jsx'
 import HelloWorld from './pages/hello/HelloWorld.jsx'
 import CounterpartyFilter from './pages/counterpartyfilter/CounterpartyFilter.jsx'
 import CounterpartyList from './pages/counterpartylist/CounterpartyList.jsx'
+import SidePanel from './pages/sidepanel/SidePanel.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -17,6 +18,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/hello" element={<HelloWorld />} />
         <Route path="/counterpartyfilter" element={<CounterpartyFilter />} />
         <Route path="/counterpartylist" element={<CounterpartyList />} />
+        <Route path="/side-panel" element={<SidePanel />} />
       </Routes>
     </HashRouter>
   </StrictMode>,

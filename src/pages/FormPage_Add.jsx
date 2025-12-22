@@ -10,7 +10,9 @@ function FormPage_Add() {
     const handleMessage = (event) => {
       const data = event.data
       console.log("Message received:", data)
-
+      console.log("data?.type:", data?.type)
+      console.log("data?.source:", data?.source)
+      console.log("data?.payload:", data?.payload)
       // Check for structured message with missing fields
       if (
         data?.type === "ui_component_render" &&

@@ -229,15 +229,8 @@ function CounterpartyList() {
                       </div>
                     )}
                     </div>
-
-                  <div className="counterparty-card__meta">
-                    <div className="counterparty-card__meta-label">LIST</div>
-                    <div className="counterparty-card__meta-value">{listLabel}</div>
-                  </div>
-
                   {keywords && keywords.length > 0 && (
                     <div className="counterparty-card__keywords">
-                      <div className="counterparty-card__meta-label">KEYWORDS</div>
                       <div className="counterparty-card__chips">
                         {keywords.map((kw, kwIdx) => (
                           <span key={kwIdx} className="counterparty-card__chip">

@@ -64,7 +64,7 @@ function HelloWorld() {
     window.parent.postMessage(
       {
         type: "ui_component_user_message",
-        message: selectedName, //  plain text only
+        message: selectedId,//  plain text only
         llmMessage: JSON.stringify(llmPayload)
       },
       "*"

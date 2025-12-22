@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useIframeMessages } from './counterpartyListIframeHook'
 import '../../App.css'
+import './CounterpartyList.css'
 
 function CounterpartyList() {
   const { originalData } = useIframeMessages()
@@ -151,144 +152,99 @@ function CounterpartyList() {
   }
 
   return (
-    <div>
+    <div className="counterparty-list-wrapper">
       {originalData && originalData.rows && originalData.rows.length > 0 ? (
-        <div
-          style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-            padding: '1.5rem',
-            maxWidth: '100%'
-          }}
-        >
+        <div>
           {/* Header */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-              <h2 style={{ margin: 0, fontSize: '1.1em', fontWeight: 'bold', color: '#213547' }}>
-                Counterparties
-              </h2>
-              <span
-                style={{
-                  backgroundColor: '#f5f5f5',
-                  color: '#666',
-                  fontSize: '0.65em',
-                  padding: '0.25rem 0.5rem',
-                  borderRadius: '12px',
-                  fontWeight: 'normal'
-                }}
-              >
-                preview
-              </span>
-            </div>
+          <div className="counterparty-list-header">
+            <h2 className="counterparty-list-title">Counterparties</h2>
+            <span className="counterparty-list-count">
+              {originalData.rows.length} result{originalData.rows.length === 1 ? '' : 's'}
+            </span>
           </div>
 
-          {/* List Items */}
-          <div>
+          {/* Card list */}
+          <div className="counterparty-card-grid">
             {originalData.rows.map((row, index) => {
               const isSelected = isRowSelected(row, index)
               const countryCode = getCountryCode(row)
               const name = getNameField(row)
               const description = getDescriptionField(row)
               const id = getIdField(row)
+              const status = row.status || countryCode || 'ACTIVE'
+              const statusClass = (status || 'active').toString().toLowerCase().replace(/\s+/g, '-')
+              const dateText = row.updatedAt || row.createdAt || row.date || ''
+              const listLabel = row.list || row.segment || 'Product Growth'
+              const cmrNumber = row.cmrNumber || row.cmr || ''
+              const gbg = row.gbg || row.region || ''
+              const ceid = row.ceid || ''
+              const keywords =
+                (Array.isArray(row.keywords) && row.keywords.filter(Boolean)) ||
+                (row.tags && Array.isArray(row.tags) && row.tags.filter(Boolean)) ||
+                []
+
+              const rowKey = getRowKey(row, index)
 
               return (
                 <div
-                  key={getRowKey(row, index)}
+                  key={rowKey}
+                  className={`counterparty-card ${isSelected ? 'is-selected' : ''}`}
                   onClick={() => handleRowClick(row)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '1rem 0',
-                    cursor: 'pointer',
-                    borderBottom: index < originalData.rows.length - 1 ? '1px solid #e0e0e0' : 'none',
-                    backgroundColor: isSelected ? '#f5f5f5' : 'transparent',
-                    transition: 'background-color 0.2s',
-                    borderRadius: '4px',
-                    margin: '0 -0.5rem',
-                    paddingLeft: '0.5rem',
-                    paddingRight: '0.5rem'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) {
-                      e.currentTarget.style.backgroundColor = '#fafafa'
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleRowClick(row)
                     }
                   }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }
-                  }}
-                  >
-                  {/* ID Block */}
-                  {id && (
-                    <div
-                      style={{
-                        minWidth: '40px',
-                        marginRight: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: '0.75em',
-                          color: '#213547',
-                          fontWeight: '600',
-                          lineHeight: '1'
-                        }}
-                      >
-                        {id}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Name and Description */}
-                  <div
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      marginRight: '1rem'
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: '0.75em',
-                        color: '#213547',
-                        fontWeight: '600',
-                        marginBottom: '0.25rem',
-                        lineHeight: '1.3'
-                      }}
-                    >
-                      {name}
-                    </div>
-                    {description && (
-                      <div
-                        style={{
-                          fontSize: '0.65em',
-                          color: '#999',
-                          fontWeight: 'normal',
-                          lineHeight: '1.3'
-                        }}
-                      >
-                        {description}
-                      </div>
-                    )}
+                >
+                  <div className="counterparty-card__top">
+                    <span className={`counterparty-card__status ${status ? 'has-status' : ''} status-${statusClass}`}>
+                      {status || 'ACTIVE'}
+                    </span>
+                    {id && <span className="counterparty-card__id">{id}</span>}
                   </div>
 
-                  {/* Country Code/Right side */}
-                  {countryCode && (
-                    <div
-                      style={{
-                        fontSize: '0.7em',
-                        color: '#666',
-                        fontWeight: 'normal',
-                        textAlign: 'right',
-                        minWidth: '80px'
-                      }}
-                    >
-                      {countryCode}
+                    <div className="counterparty-card__body">
+                      <div className="counterparty-card__name">{name}</div>
+                      {dateText && <div className="counterparty-card__date">{dateText}</div>}
+                      {description && <div className="counterparty-card__desc">{description}</div>}
+                    {cmrNumber && (
+                      <div className="counterparty-card__meta-line">
+                        <span className="counterparty-card__meta-label-inline">CMR Number: </span>
+                        <span className="counterparty-card__meta-value-inline">{cmrNumber}</span>
+                      </div>
+                    )}
+                    {gbg && (
+                      <div className="counterparty-card__meta-line">
+                        <span className="counterparty-card__meta-label-inline">GBG: </span>
+                        <span className="counterparty-card__meta-value-inline">{gbg}</span>
+                      </div>
+                    )}
+                    {ceid && (
+                      <div className="counterparty-card__meta-line">
+                        <span className="counterparty-card__meta-label-inline">CEID: </span>
+                        <span className="counterparty-card__meta-value-inline">{ceid}</span>
+                      </div>
+                    )}
+                    </div>
+
+                  <div className="counterparty-card__meta">
+                    <div className="counterparty-card__meta-label">LIST</div>
+                    <div className="counterparty-card__meta-value">{listLabel}</div>
+                  </div>
+
+                  {keywords && keywords.length > 0 && (
+                    <div className="counterparty-card__keywords">
+                      <div className="counterparty-card__meta-label">KEYWORDS</div>
+                      <div className="counterparty-card__chips">
+                        {keywords.map((kw, kwIdx) => (
+                          <span key={kwIdx} className="counterparty-card__chip">
+                            {kw}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -297,7 +253,7 @@ function CounterpartyList() {
           </div>
 
           {/* Submit Button */}
-          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+          <div className="counterparty-card__actions">
             <button
               type="button"
               onClick={handleSubmit}

@@ -1,0 +1,244 @@
+.counterparty-list-wrapper {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.75rem;
+}
+
+.counterparty-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.counterparty-list-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.counterparty-list-count {
+  font-size: 0.85rem;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+}
+
+.counterparty-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+}
+
+.counterparty-card {
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.2rem 0.95rem 1.1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease, background 0.2s ease;
+  min-height: 210px;
+}
+
+.counterparty-card:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.counterparty-card.is-selected {
+  
+  box-shadow: 0 14px 28px rgba(100, 108, 255, 0.18);
+  background: #f8f9ff;
+}
+
+.counterparty-card__top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  justify-content: center;
+}
+
+.counterparty-card__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  min-width: 84px;
+  justify-content: center;
+}
+
+.counterparty-card__id {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.counterparty-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  text-align: center;
+  align-items: center;
+  width: 100%;
+}
+
+.counterparty-card__name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.counterparty-card__date {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.counterparty-card__desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.4;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  max-width: 100%;
+}
+
+.counterparty-card__meta-line {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.counterparty-card__meta-label-inline {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.counterparty-card__meta-value-inline {
+  font-weight: 600;
+  color: #334155;
+}
+
+.counterparty-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+.counterparty-card__meta-label {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 700;
+}
+
+.counterparty-card__meta-value {
+  font-size: 0.85rem;
+  color: #0f172a;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.counterparty-card__keywords {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.counterparty-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.counterparty-card__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 0.85rem;
+  border: 1px solid #e0e7ff;
+}
+
+.counterparty-card__actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.counterparty-card__actions .submit-button {
+  padding: 0.55rem 1.4rem !important;
+  background-color: #646cff !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+  min-width: 110px;
+}
+
+.counterparty-card__actions .submit-button:hover:not([disabled]) {
+  background-color: #535bf2 !important;
+}
+
+.counterparty-card__actions .submit-button[disabled] {
+  background-color: #dfe3ff !important;
+  color: #6b7280 !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+/* Status color variants */
+.counterparty-card__status.status-complete,
+.counterparty-card__status.status-completed {
+  background: #eef9f3;
+  color: #15803d;
+}
+
+.counterparty-card__status.status-draft {
+  background: #f3f4f6;
+  color: #475569;
+}
+
+.counterparty-card__status.status-running,
+.counterparty-card__status.status-active {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+

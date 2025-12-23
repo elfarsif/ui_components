@@ -16,8 +16,14 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
   const [isOpen, setIsOpen] = useState(false)
   const [month, setMonth] = useState(value ? new Date(value) : new Date())
   const [popoverStyle, setPopoverStyle] = useState({})
+  const [monthSearch, setMonthSearch] = useState('')
+  const [yearSearch, setYearSearch] = useState('')
+  const [monthOpen, setMonthOpen] = useState(false)
+  const [yearOpen, setYearOpen] = useState(false)
   const wrapperRef = useRef(null)
   const popoverRef = useRef(null)
+  const monthBlurRef = useRef(null)
+  const yearBlurRef = useRef(null)
 
   const parseDate = (dateString) =>
     dateString ? new Date(`${dateString}T00:00:00`) : undefined
@@ -204,33 +210,129 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
               >
                 &lt;
               </button>
-              <select
-                className="date-picker-select"
-                value={month.getMonth()}
-                onChange={handleMonthChange}
-              >
-                {months.map((monthName, index) => (
-                  <option key={index} value={index}>
-                    {monthName}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="date-picker-select date-picker-year-select"
-                value={month.getFullYear()}
-                onChange={handleYearChange}
-                style={{ 
-                  direction: 'ltr',
-                  position: 'relative',
-                  zIndex: 1001
-                }}
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
+              <div className={`searchable-select month-select ${monthOpen ? 'open' : ''}`}>
+                <div className="searchable-select__control">
+                  <input
+                    type="text"
+                    className="date-picker-select searchable-select__input"
+                    value={monthSearch || months[month.getMonth()] || ''}
+                    placeholder="Month"
+                    onFocus={() => {
+                      if (monthBlurRef.current) clearTimeout(monthBlurRef.current)
+                      setMonthOpen(true)
+                    }}
+                    onChange={(e) => {
+                      const next = e.target.value
+                      setMonthSearch(next)
+                    }}
+                    onBlur={() => {
+                      monthBlurRef.current = setTimeout(() => setMonthOpen(false), 120)
+                    }}
+                    autoComplete="off"
+                  />
+                  <span className="searchable-select__chevron" aria-hidden="true"></span>
+                </div>
+                {monthOpen && (
+                  <div className="searchable-select__menu">
+                    {(() => {
+                      const filtered = months.filter((m) =>
+                        m.toLowerCase().includes((monthSearch || '').toLowerCase())
+                      )
+                      const currentLabel = months[month.getMonth()]
+                      if (currentLabel && !filtered.includes(currentLabel)) {
+                        filtered.unshift(currentLabel)
+                      }
+                      return filtered.length > 0 ? (
+                        filtered.map((monthName, index) => (
+                          <div
+                            key={`${monthName}-${index}`}
+                            className={`searchable-select__option ${
+                              monthName === months[month.getMonth()] ? 'is-selected' : ''
+                            }`}
+                            onMouseDown={(e) => {
+                              e.preventDefault()
+                              const newMonth = months.indexOf(monthName)
+                              if (newMonth >= 0) {
+                                const nextMonth = new Date(month)
+                                nextMonth.setMonth(newMonth)
+                                setMonth(nextMonth)
+                                setMonthSearch(monthName)
+                              }
+                              setMonthOpen(false)
+                            }}
+                          >
+                            {monthName}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="searchable-select__option searchable-select__option--empty">
+                          No results
+                        </div>
+                      )
+                    })()}
+                  </div>
+                )}
+              </div>
+              <div className={`searchable-select year-select ${yearOpen ? 'open' : ''}`}>
+                <div className="searchable-select__control">
+                  <input
+                    type="text"
+                    className="date-picker-select searchable-select__input"
+                    value={yearSearch || month.getFullYear().toString()}
+                    placeholder="Year"
+                    onFocus={() => {
+                      if (yearBlurRef.current) clearTimeout(yearBlurRef.current)
+                      setYearOpen(true)
+                    }}
+                    onChange={(e) => {
+                      const next = e.target.value
+                      setYearSearch(next)
+                    }}
+                    onBlur={() => {
+                      yearBlurRef.current = setTimeout(() => setYearOpen(false), 120)
+                    }}
+                    autoComplete="off"
+                  />
+                  <span className="searchable-select__chevron" aria-hidden="true"></span>
+                </div>
+                {yearOpen && (
+                  <div className="searchable-select__menu">
+                    {(() => {
+                      const filtered = years
+                        .map((y) => y.toString())
+                        .filter((y) => y.includes((yearSearch || '').toString()))
+                      const currentYearStr = month.getFullYear().toString()
+                      if (currentYearStr && !filtered.includes(currentYearStr)) {
+                        filtered.unshift(currentYearStr)
+                      }
+                      return filtered.length > 0 ? (
+                        filtered.map((yearVal) => (
+                          <div
+                            key={yearVal}
+                            className={`searchable-select__option ${
+                              yearVal === currentYearStr ? 'is-selected' : ''
+                            }`}
+                            onMouseDown={(e) => {
+                              e.preventDefault()
+                              const nextMonth = new Date(month)
+                              nextMonth.setFullYear(parseInt(yearVal, 10))
+                              setMonth(nextMonth)
+                              setYearSearch(yearVal)
+                              setYearOpen(false)
+                            }}
+                          >
+                            {yearVal}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="searchable-select__option searchable-select__option--empty">
+                          No results
+                        </div>
+                      )
+                    })()}
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 className="date-picker-nav-button"

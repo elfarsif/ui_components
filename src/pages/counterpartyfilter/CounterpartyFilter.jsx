@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import '../../App.css'
 
 const countryCodes = [
@@ -33,6 +33,9 @@ function CounterpartyFilter() {
   const [counterpartyName, setCounterpartyName] = useState('')
   const [country, setCountry] = useState('')
   const [address, setAddress] = useState('')
+  const [countrySearch, setCountrySearch] = useState('')
+  const [countryOpen, setCountryOpen] = useState(false)
+  const blurTimeoutRef = useRef(null)
 
   const formatAsPlainText = ({ counterpartyName, address }) => {
     const lines = []
@@ -115,19 +118,62 @@ function CounterpartyFilter() {
           </div>
           <div className="form-field">
             <label htmlFor="country">Country:</label>
-            <select
-              id="country"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              className="form-input"
-            >
-              <option value="">Select a country</option>
-              {countryCodes.map((countryOption) => (
-                <option key={countryOption.code} value={countryOption.code}>
-                  {countryOption.name} ({countryOption.code})
-                </option>
-              ))}
-            </select>
+            <div className={`searchable-select ${countryOpen ? 'open' : ''}`}>
+              <div className="searchable-select__control">
+                <input
+                  type="text"
+                  id="country"
+                  className="form-input searchable-select__input"
+                  placeholder="Search country"
+                  value={country || countrySearch}
+                  onFocus={() => {
+                    if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+                    setCountryOpen(true)
+                  }}
+                  onChange={(e) => {
+                    const next = e.target.value
+                    setCountrySearch(next)
+                    setCountry(next)
+                  }}
+                  onBlur={() => {
+                    blurTimeoutRef.current = setTimeout(() => setCountryOpen(false), 120)
+                  }}
+                  autoComplete="off"
+                />
+                <span className="searchable-select__chevron" aria-hidden="true"></span>
+              </div>
+              {countryOpen && (
+                <div className="searchable-select__menu">
+                  {countryCodes
+                    .filter(({ name, code }) =>
+                      `${name} (${code})`.toLowerCase().includes((countrySearch || '').toLowerCase())
+                    )
+                    .map((countryOption) => (
+                      <div
+                        key={countryOption.code}
+                        className={`searchable-select__option ${
+                          countryOption.code === country ? 'is-selected' : ''
+                        }`}
+                        onMouseDown={(e) => {
+                          e.preventDefault()
+                          setCountry(countryOption.code)
+                          setCountrySearch(`${countryOption.name} (${countryOption.code})`)
+                          setCountryOpen(false)
+                        }}
+                      >
+                        {countryOption.name} ({countryOption.code})
+                      </div>
+                    ))}
+                  {countryCodes.filter(({ name, code }) =>
+                    `${name} (${code})`.toLowerCase().includes((countrySearch || '').toLowerCase())
+                  ).length === 0 && (
+                    <div className="searchable-select__option searchable-select__option--empty">
+                      No results
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <button type="submit" className="submit-button">
             Submit

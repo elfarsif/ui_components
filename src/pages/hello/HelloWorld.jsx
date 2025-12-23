@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useIframeMessages } from './helloIframeHook'
 import './HelloWorld.css'
 
 function HelloWorld() {
   const [selectedName, setSelectedName] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isOpen, setIsOpen] = useState(false)
+  const blurTimeoutRef = useRef(null)
   const { originalData } = useIframeMessages()
 
   /**
@@ -72,6 +75,14 @@ function HelloWorld() {
   }
 
   const names = getNames()
+  const filteredNames = names.filter((name) =>
+    name?.toString().toLowerCase().includes((searchTerm || '').toLowerCase())
+  )
+
+  // Keep the current selection visible even if the filter no longer matches
+  if (selectedName && !filteredNames.includes(selectedName)) {
+    filteredNames.unshift(selectedName)
+  }
 
   return (
     <div className="hello-world-container">
@@ -79,19 +90,56 @@ function HelloWorld() {
         <div className="dropdown-container">
           <label htmlFor="name-dropdown">Select a Workflow:</label>
 
-          <select
-            id="name-dropdown"
-            value={selectedName}
-            onChange={(e) => setSelectedName(e.target.value)}
-            className="name-dropdown"
-          >
-            <option value="">-- Select a Workflow --</option>
-            {names.map((name, index) => (
-              <option key={index} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
+          <div className={`searchable-select ${isOpen ? 'open' : ''}`}>
+            <div className="searchable-select__control">
+              <input
+                type="text"
+                id="name-dropdown"
+                className="name-dropdown searchable-select__input"
+                placeholder="Search workflow"
+                value={selectedName || searchTerm}
+                onFocus={() => {
+                  if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+                  setIsOpen(true)
+                }}
+                onChange={(e) => {
+                  const next = e.target.value
+                  setSearchTerm(next)
+                  setSelectedName(next)
+                }}
+                onBlur={() => {
+                  blurTimeoutRef.current = setTimeout(() => setIsOpen(false), 120)
+                }}
+                autoComplete="off"
+              />
+              <span className="searchable-select__chevron" aria-hidden="true"></span>
+            </div>
+            {isOpen && (
+              <div className="searchable-select__menu">
+                {filteredNames.length === 0 && (
+                  <div className="searchable-select__option searchable-select__option--empty">
+                    No results
+                  </div>
+                )}
+                {filteredNames.map((name, index) => (
+                  <div
+                    key={index}
+                    className={`searchable-select__option ${
+                      name === selectedName ? 'is-selected' : ''
+                    }`}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      setSelectedName(name)
+                      setSearchTerm(name)
+                      setIsOpen(false)
+                    }}
+                  >
+                    {name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           <button
             type="button"

@@ -189,7 +189,7 @@ function FormPage() {
                         }}
                         autoComplete="off"
                       />
-                      <span className="searchable-select__chevron">▾</span>
+                      <span className="searchable-select__chevron" aria-hidden="true"></span>
                     </div>
                     {openDropdown === columnKey && (
                       <div className="searchable-select__menu">

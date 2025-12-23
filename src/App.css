@@ -226,6 +226,19 @@ form {
   border-color: #d0d0d0;
 }
 
+.autocomplete-dropdown {
+  font-size: 0.6em;
+}
+
+.autocomplete-option {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.autocomplete-option:hover {
+  background: #f5f6fb;
+}
+
 .date-picker-wrapper {
   width: 100%;
   position: static;

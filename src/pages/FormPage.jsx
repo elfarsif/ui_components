@@ -5,6 +5,7 @@ import DatePicker from '../components/DatePicker'
 // testing 
 function FormPage() {
   const [formValues, setFormValues] = useState({})
+  const [openDropdownKey, setOpenDropdownKey] = useState(null)
 
   // Receive data from iframe messages
   const { originalData } = useIframeMessages((initialValues) => {
@@ -138,26 +139,78 @@ function FormPage() {
                   )
                 }
 
-                // Dropdown
+                // Dropdown with search
                 if (isSelect) {
+                  const searchValue = (value ?? '').toString()
+                  const filteredOptions = inferredOptions.filter((opt) =>
+                    (opt ?? '').toString().toLowerCase().includes(searchValue.toLowerCase())
+                  )
+
                   return (
-                  <select
-                    id={`field-${index}`}
-                    value={value}
-                    onChange={(e) =>
-                      setFormValues((prev) => ({
-                        ...prev,
-                        [columnKey]: e.target.value
-                      }))
-                    }
-                    className="form-input"
-                  >
-                      {inferredOptions.map((opt, optIndex) => (
-                        <option key={optIndex} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
+                    <div
+                      className="select-autocomplete"
+                      style={{ position: 'relative' }}
+                      onBlur={() => {
+                        // let click events finish
+                        setTimeout(() => setOpenDropdownKey(null), 120)
+                      }}
+                    >
+                      <input
+                        id={`field-${index}`}
+                        type="text"
+                        value={searchValue}
+                        onFocus={() => setOpenDropdownKey(columnKey)}
+                        onClick={() => setOpenDropdownKey(columnKey)} // open on click even without typing
+                        onChange={(e) => {
+                          const nextValue = e.target.value
+                          setFormValues((prev) => ({
+                            ...prev,
+                            [columnKey]: nextValue
+                          }))
+                          setOpenDropdownKey(columnKey)
+                        }}
+                        className="form-input"
+                        placeholder={`Search ${columnLabel.toLowerCase()}`}
+                        autoComplete="off"
+                      />
+                      {openDropdownKey === columnKey && filteredOptions.length > 0 && (
+                        <div
+                          className="autocomplete-dropdown"
+                          style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            marginTop: '4px',
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '6px',
+                            background: '#fff',
+                            boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                            maxHeight: '180px',
+                            overflowY: 'auto',
+                            zIndex: 10,
+                            fontSize: '0.6em'
+                          }}
+                        >
+                          {filteredOptions.map((opt, optIndex) => (
+                            <div
+                              key={optIndex}
+                              className="autocomplete-option"
+                              onMouseDown={(e) => {
+                                e.preventDefault()
+                                setFormValues((prev) => ({
+                                  ...prev,
+                                  [columnKey]: opt
+                                }))
+                                setOpenDropdownKey(null)
+                              }}
+                            >
+                              {opt}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   )
                 }
 

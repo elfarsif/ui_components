@@ -66,8 +66,17 @@ function CounterpartyListExtended() {
   const handleSubmit = () => {
     if (!selectedRow) return
 
-    // Send all fields from the selected row
-    const dataToSend = { ...selectedRow }
+    // Get name field
+    const name = getFieldValue(selectedRow, 'name') || 'N/A'
+    
+    // Get address field
+    const address = getFieldValue(selectedRow, 'address') || 'N/A'
+
+    // Only send name and address
+    const dataToSend = {
+      name: name,
+      address: address
+    }
 
     // Create LLM payload
     const llmPayload = {

@@ -102,20 +102,18 @@ function CounterpartyListExtended() {
 
   const columns = getColumns()
 
-  // Extract country code from address (typically at the end, e.g., "CN", "US")
+  // Extract country code from address or country field
   const getCountryCode = (row) => {
     const address = row.address || row.cf_cpAddress || ''
     // Try to extract country code from the end of the address
-    // Common pattern: address ends with country code like "CN", "US", etc.
     const parts = address.trim().split(/\s+/)
     if (parts.length > 0) {
       const lastPart = parts[parts.length - 1]
-      // Check if it's a 2-letter uppercase code (country code pattern)
       if (lastPart && lastPart.length === 2 && /^[A-Z]{2}$/.test(lastPart)) {
         return lastPart
       }
     }
-    // Fallback: check if there's a country field
+    // Fallback: use first 2 letters of country name if available
     if (row.dyn102926) {
       const country = String(row.dyn102926).toUpperCase()
       if (country.length >= 2) {
@@ -126,38 +124,17 @@ function CounterpartyListExtended() {
     return ''
   }
 
-  // Get the primary name field and description field
-  const getNameField = (row) => {
-    if (row.dyn101187) return row.dyn101187
-    if (row.name) return row.name
-    const columns = getColumns()
-    if (columns.length > 0) {
-      const firstCol = columns[0]
-      return row[firstCol.key] || 'N/A'
-    }
-    return 'N/A'
+  // Get field value by key
+  const getFieldValue = (row, key) => {
+    const value = row[key]
+    if (value === null || value === undefined || value === '') return null
+    return String(value)
   }
 
-  const getDescriptionField = (row) => {
-    if (row.address) return row.address
-    if (row.cf_cpAddress) return row.cf_cpAddress
-    const columns = getColumns()
-    if (columns.length > 1) {
-      const secondCol = columns[1]
-      return row[secondCol.key] || ''
-    }
-    return ''
-  }
-
-  const getIdField = (row) => {
-    if (row.dyn102809) return row.dyn102809
-    if (row.id) return row.id
-    const columns = getColumns()
-    if (columns.length > 0) {
-      const firstCol = columns[0]
-      return row[firstCol.key] || ''
-    }
-    return ''
+  // Get field label by key
+  const getFieldLabel = (key) => {
+    const column = columns.find(col => col.key === key)
+    return column ? column.label : key
   }
 
   return (
@@ -175,9 +152,10 @@ function CounterpartyListExtended() {
             {originalData.rows.map((row, index) => {
               const isSelected = isRowSelected(row, index)
               const countryCode = getCountryCode(row)
-              const name = getNameField(row)
-              const description = getDescriptionField(row)
-              const id = getIdField(row)
+              
+              // Get the first field value for the ID badge
+              const firstColumn = columns.length > 0 ? columns[0] : null
+              const firstFieldValue = firstColumn ? getFieldValue(row, firstColumn.key) : null
 
               return (
                 <div
@@ -189,14 +167,26 @@ function CounterpartyListExtended() {
                     {countryCode && (
                       <span className="counterparty-card__status">{countryCode}</span>
                     )}
-                    {id && <span className="counterparty-card__id">{id}</span>}
+                    {firstFieldValue && <span className="counterparty-card__id">{firstFieldValue}</span>}
                   </div>
 
                   <div className="counterparty-card__body">
-                    <div className="counterparty-card__name">{name}</div>
-                    {description && (
-                      <div className="counterparty-card__desc">{description}</div>
-                    )}
+                    {/* Display all fields with labels */}
+                    {columns.map((column) => {
+                      const value = getFieldValue(row, column.key)
+                      if (!value) return null
+                      
+                      return (
+                        <div key={column.key} className="counterparty-card__meta-line">
+                          <span className="counterparty-card__meta-label-inline">
+                            {column.label}: 
+                          </span>
+                          <span className="counterparty-card__meta-value-inline">
+                            {value}
+                          </span>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )

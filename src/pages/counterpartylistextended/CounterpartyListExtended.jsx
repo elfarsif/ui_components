@@ -102,6 +102,24 @@ function CounterpartyListExtended() {
 
   const columns = getColumns()
 
+  // Get country name for sorting
+  const getCountryName = (row) => {
+    // Try to get country from dyn102926 field (Issuing country name)
+    if (row.dyn102926) return String(row.dyn102926).toLowerCase()
+    // Fallback to country field if available
+    if (row.country) return String(row.country).toLowerCase()
+    // Extract from address if available
+    const address = row.address || row.cf_cpAddress || ''
+    const parts = address.trim().split(/\s+/)
+    if (parts.length > 0) {
+      const lastPart = parts[parts.length - 1]
+      if (lastPart && lastPart.length === 2 && /^[A-Z]{2}$/.test(lastPart)) {
+        return lastPart.toLowerCase()
+      }
+    }
+    return 'zzz' // Put items without country at the end
+  }
+
   // Extract country code from address or country field
   const getCountryCode = (row) => {
     const address = row.address || row.cf_cpAddress || ''
@@ -149,7 +167,13 @@ function CounterpartyListExtended() {
 
           {/* Card Grid */}
           <div className="counterparty-card-grid">
-            {originalData.rows.map((row, index) => {
+            {[...originalData.rows]
+              .sort((a, b) => {
+                const countryA = getCountryName(a)
+                const countryB = getCountryName(b)
+                return countryA.localeCompare(countryB)
+              })
+              .map((row, index) => {
               const isSelected = isRowSelected(row, index)
               const countryCode = getCountryCode(row)
               
@@ -164,9 +188,7 @@ function CounterpartyListExtended() {
                   className={`counterparty-card ${isSelected ? 'is-selected' : ''}`}
                 >
                   <div className="counterparty-card__top">
-                    {countryCode && (
-                      <span className="counterparty-card__status">{countryCode}</span>
-                    )}
+                    <span className="counterparty-card__status">{countryCode || 'N/A'}</span>
                     {firstFieldValue && <span className="counterparty-card__id">{firstFieldValue}</span>}
                   </div>
 
@@ -174,7 +196,7 @@ function CounterpartyListExtended() {
                     {/* Display all fields with labels */}
                     {columns.map((column) => {
                       const value = getFieldValue(row, column.key)
-                      if (!value) return null
+                      const displayValue = value || 'N/A'
                       
                       return (
                         <div key={column.key} className="counterparty-card__meta-line">
@@ -182,7 +204,7 @@ function CounterpartyListExtended() {
                             {column.label}: 
                           </span>
                           <span className="counterparty-card__meta-value-inline">
-                            {value}
+                            {displayValue}
                           </span>
                         </div>
                       )

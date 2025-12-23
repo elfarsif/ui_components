@@ -189,6 +189,7 @@ form {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  position: relative; /* allow dropdown/menu to overlay siblings cleanly */
 }
 
 .form-field:has(.radio-group) {
@@ -224,19 +225,6 @@ form {
 .form-input:focus {
   outline: none;
   border-color: #d0d0d0;
-}
-
-.autocomplete-dropdown {
-  font-size: 0.6em;
-}
-
-.autocomplete-option {
-  padding: 8px 10px;
-  cursor: pointer;
-}
-
-.autocomplete-option:hover {
-  background: #f5f6fb;
 }
 
 .date-picker-wrapper {
@@ -667,6 +655,77 @@ form .submit-button,
   background-color: #4348d4;
 }
  
+/* Searchable select */
+.searchable-select {
+  position: relative;
+  z-index: 2000; /* keep menu above other fields and popovers */
+}
+
+.searchable-select.open {
+  z-index: 11999; /* elevate the entire control when open, similar to date picker */
+}
+
+.searchable-select__control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchable-select__input {
+  padding-right: 2rem !important;
+  cursor: text;
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.searchable-select__chevron {
+  position: absolute;
+  right: 0.75rem;
+  pointer-events: none;
+  color: #5f6368;
+  font-size: 0.7rem;
+}
+
+.searchable-select__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 12000; /* elevate over date picker popovers and fields below */
+  font-size:1 rem;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.searchable-select__option {
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  font-family: inherit;
+}
+
+.searchable-select__option:hover {
+  background: #f5f7fb;
+}
+
+.searchable-select__option.is-selected {
+  background: #eef1fb;
+  font-weight: 400;
+}
+
+.searchable-select__option--empty {
+  color: #6b7280;
+  cursor: default;
+}
+
 @media (max-width: 768px) {
   /* Form is already single column */
 }

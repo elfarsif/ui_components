@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import '../App.css'
 import { useIframeMessages } from '../hooks/useIframeMessages'
 import DatePicker from '../components/DatePicker'
 // testing 
 function FormPage() {
   const [formValues, setFormValues] = useState({})
-  const [openDropdownKey, setOpenDropdownKey] = useState(null)
+  const [searchTerms, setSearchTerms] = useState({})
+  const [openDropdown, setOpenDropdown] = useState(null)
+  const blurTimeoutRef = useRef(null)
 
   // Receive data from iframe messages
   const { originalData } = useIframeMessages((initialValues) => {
@@ -121,6 +123,18 @@ function FormPage() {
               )
 
               const isSelect = !isDateField && inferredOptions.length > 1
+              const searchTerm = searchTerms[columnKey] ?? ''
+              const filteredOptions = inferredOptions.filter((opt) =>
+                opt
+                  ?.toString()
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase())
+              )
+
+              // Keep the currently selected value visible even if it does not match the filter
+              if (value && !filteredOptions.includes(value)) {
+                filteredOptions.unshift(value)
+              }
 
               const renderField = () => {
                 // Date picker
@@ -139,78 +153,76 @@ function FormPage() {
                   )
                 }
 
-                // Dropdown with search
+                // Dropdown (searchable)
                 if (isSelect) {
-                  const searchValue = (value ?? '').toString()
-                  const filteredOptions = inferredOptions.filter((opt) =>
-                    (opt ?? '').toString().toLowerCase().includes(searchValue.toLowerCase())
-                  )
-
                   return (
-                    <div
-                      className="select-autocomplete"
-                      style={{ position: 'relative' }}
-                      onBlur={() => {
-                        // let click events finish
-                        setTimeout(() => setOpenDropdownKey(null), 120)
-                      }}
-                    >
+                  <div
+                    className={`searchable-select ${openDropdown === columnKey ? 'open' : ''}`}
+                  >
+                    <div className="searchable-select__control">
                       <input
-                        id={`field-${index}`}
                         type="text"
-                        value={searchValue}
-                        onFocus={() => setOpenDropdownKey(columnKey)}
-                        onClick={() => setOpenDropdownKey(columnKey)} // open on click even without typing
+                        id={`field-${index}`}
+                        className="form-input searchable-select__input"
+                        placeholder={`Search ${columnLabel.toLowerCase()}`}
+                        value={value || searchTerm}
+                        onFocus={() => {
+                          if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+                          setOpenDropdown(columnKey)
+                        }}
                         onChange={(e) => {
-                          const nextValue = e.target.value
+                          const next = e.target.value
+                          setSearchTerms((prev) => ({
+                            ...prev,
+                            [columnKey]: next
+                          }))
                           setFormValues((prev) => ({
                             ...prev,
-                            [columnKey]: nextValue
+                            [columnKey]: next
                           }))
-                          setOpenDropdownKey(columnKey)
                         }}
-                        className="form-input"
-                        placeholder={`Search ${columnLabel.toLowerCase()}`}
+                        onBlur={() => {
+                          // Delay closing so option click can register
+                          blurTimeoutRef.current = setTimeout(() => {
+                            setOpenDropdown((prev) => (prev === columnKey ? null : prev))
+                          }, 120)
+                        }}
                         autoComplete="off"
                       />
-                      {openDropdownKey === columnKey && filteredOptions.length > 0 && (
-                        <div
-                          className="autocomplete-dropdown"
-                          style={{
-                            position: 'absolute',
-                            top: '100%',
-                            left: 0,
-                            right: 0,
-                            marginTop: '4px',
-                            border: '1px solid #d9d9d9',
-                            borderRadius: '6px',
-                            background: '#fff',
-                            boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
-                            maxHeight: '180px',
-                            overflowY: 'auto',
-                            zIndex: 10,
-                            fontSize: '0.6em'
-                          }}
-                        >
-                          {filteredOptions.map((opt, optIndex) => (
-                            <div
-                              key={optIndex}
-                              className="autocomplete-option"
-                              onMouseDown={(e) => {
-                                e.preventDefault()
-                                setFormValues((prev) => ({
-                                  ...prev,
-                                  [columnKey]: opt
-                                }))
-                                setOpenDropdownKey(null)
-                              }}
-                            >
-                              {opt}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <span className="searchable-select__chevron">▾</span>
                     </div>
+                    {openDropdown === columnKey && (
+                      <div className="searchable-select__menu">
+                        {filteredOptions.length === 0 && (
+                          <div className="searchable-select__option searchable-select__option--empty">
+                            No results
+                          </div>
+                        )}
+                        {filteredOptions.map((opt, optIndex) => (
+                          <div
+                            key={optIndex}
+                            className={`searchable-select__option ${
+                              opt === value ? 'is-selected' : ''
+                            }`}
+                            onMouseDown={(e) => {
+                              e.preventDefault()
+                              setFormValues((prev) => ({
+                                ...prev,
+                                [columnKey]: opt
+                              }))
+                              setSearchTerms((prev) => ({
+                                ...prev,
+                                [columnKey]: opt
+                              }))
+                              setOpenDropdown(null)
+                            }}
+                          >
+                            {opt}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   )
                 }
 

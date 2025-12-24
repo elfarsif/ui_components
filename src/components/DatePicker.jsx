@@ -131,7 +131,7 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
 
   // Generate years: 20 years in the past to current year
   const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 21 }, (_, i) => currentYear - 20 + i)
+  const years = Array.from({ length: 40 }, (_, i) => currentYear - 20 + i)
 
   const handleMonthChange = (e) => {
     const newMonth = new Date(month)
@@ -146,7 +146,11 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
   }
 
   return (
-    <div className={`date-picker-wrapper ${className}`} ref={wrapperRef} style={{ position: 'relative', zIndex: 9999 }}>
+    <div
+      className={`date-picker-wrapper ${className}`}
+      ref={wrapperRef}
+      style={{ position: 'relative', zIndex: 'auto' }} /* keep inputs in normal stacking; popover handles its own z-index */
+    >
       <div className="date-picker-input-container">
         <svg 
           className="date-picker-icon" 

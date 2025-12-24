@@ -190,6 +190,7 @@ form {
   flex-direction: column;
   gap: 0.35rem;
   position: relative; /* allow dropdown/menu to overlay siblings cleanly */
+  overflow: visible;  /* prevent clipping when dropdown menus expand */
 }
 
 .form-field:has(.radio-group) {
@@ -267,9 +268,10 @@ form {
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
   z-index: 2147483647 !important;
-  padding: 0.5rem;
-  min-width: 220px;
-  max-width: 260px;
+  padding: 0.45rem 0.45rem 0.65rem;
+  min-width: 160px;
+  max-width: 240px;
+  width: 240px;
   overflow: visible;
   transform-origin: top left;
   isolation: isolate;
@@ -306,10 +308,11 @@ form {
   grid-template-columns: auto minmax(90px, 1fr) minmax(70px, 1fr) auto;
   align-items: center;
   margin-bottom: 0.35rem;
-  gap: 0.8rem;
+  gap: 0.55rem;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  padding: 0 0.1rem;
 }
 
 .date-picker-header .searchable-select {
@@ -321,8 +324,8 @@ form {
 
 .date-picker-header .month-select {
   width: 100%;
-  min-width: 100px;
-  max-width: 140px;
+  min-width: 80px;
+  max-width: 110px;
 }
 
 .date-picker-header .year-select {
@@ -351,9 +354,9 @@ form {
 
 .date-picker-header .searchable-select__input {
   width: 100%;
-  padding-left: 0.5rem !important;
-  padding-right: 1.6rem !important;
-  font-size: 0.7rem;
+  padding-left: 0.4rem !important;
+  padding-right: 1.4rem !important;
+  font-size: 0.65rem;
 }
 
 .date-picker-header .searchable-select.open {
@@ -705,11 +708,12 @@ form .submit-button,
 /* Searchable select */
 .searchable-select {
   position: relative;
-  z-index: 2000; /* keep menu above other fields and popovers */
+  z-index: 10;
+  isolation: isolate; /* keep menu stacking separate from neighboring fields */
 }
 
 .searchable-select.open {
-  z-index: 11999; /* elevate the entire control when open, similar to date picker */
+  z-index: 2147483646; /* sit above form fields + date inputs */
 }
 
 .searchable-select__control {
@@ -751,7 +755,9 @@ form .submit-button,
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   max-height: 240px;
   overflow-y: auto;
-  z-index: 12000; /* elevate over date picker popovers and fields below */
+  z-index: 2147483647; /* keep menu above sibling fields and inputs */
+  color: inherit;
+  box-sizing: border-box;
   font-size:1 rem;
   line-height: 1.4;
   font-family: inherit;

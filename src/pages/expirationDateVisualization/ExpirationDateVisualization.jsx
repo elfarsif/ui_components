@@ -6,21 +6,18 @@ import './ExpirationDateVisualization.css'
 function ExpirationDateVisualization() {
   const { originalData } = useIframeMessages()
   const svgRef = useRef(null)
-  const [hoveredCell, setHoveredCell] = useState(null)
+  const [selectedYear, setSelectedYear] = useState(null)
+  const [availableYears, setAvailableYears] = useState([])
+  const [hoveredContract, setHoveredContract] = useState(null)
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
-
-  // Helper function to get week of month (1-5)
-  const getWeekOfMonth = (date) => {
-    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1)
-    const firstDayOfWeek = firstDay.getDay()
-    const dayOfMonth = date.getDate()
-    return Math.ceil((dayOfMonth + firstDayOfWeek) / 7)
-  }
 
   useEffect(() => {
     if (!originalData || !originalData.rows || originalData.rows.length === 0) {
       return
     }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
     // Parse expiration dates and filter out nulls
     const contracts = originalData.rows
@@ -33,11 +30,9 @@ function ExpirationDateVisualization() {
         if (expDate.includes('-')) {
           const parts = expDate.split('-')
           if (parts.length === 3) {
-            // Check if first part is 4 digits (YYYY-MM-DD format)
             if (parts[0].length === 4) {
               date = new Date(expDate) // YYYY-MM-DD format
             } else {
-              // MM-DD-YYYY format
               const month = parseInt(parts[0], 10) - 1
               const day = parseInt(parts[1], 10)
               const year = parseInt(parts[2], 10)
@@ -48,13 +43,18 @@ function ExpirationDateVisualization() {
         
         if (!date || isNaN(date.getTime())) return null
         
+        date.setHours(0, 0, 0, 0)
+        const daysUntilExpiration = Math.ceil((date - today) / (1000 * 60 * 60 * 24))
+        
         return {
           id: row.id,
           contractingParty: row.dyn101208 || 'N/A',
           expirationDate: date,
           dateString: expDate,
-          month: d3.timeFormat('%Y-%m')(date),
-          weekOfMonth: getWeekOfMonth(date)
+          daysUntilExpiration: daysUntilExpiration,
+          year: date.getFullYear(),
+          month: date.getMonth(),
+          day: date.getDate()
         }
       })
       .filter(contract => contract !== null)
@@ -63,270 +63,266 @@ function ExpirationDateVisualization() {
       return
     }
 
+    // Get available years and set default
+    const years = [...new Set(contracts.map(c => c.year))].sort()
+    setAvailableYears(years)
+    if (!selectedYear && years.length > 0) {
+      setSelectedYear(years[0])
+    }
+
+    if (!selectedYear) return
+
+    // Filter contracts for selected year
+    const yearContracts = contracts.filter(c => c.year === selectedYear)
+
     // Clear previous visualization
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
 
     // Set up dimensions
-    const margin = { top: 100, right: 30, bottom: 80, left: 100 }
-    const width = 1400 - margin.left - margin.right
-    const height = 600 - margin.top - margin.bottom
+    const margin = { top: 80, right: 30, bottom: 30, left: 30 }
+    const calendarWidth = 200
+    const calendarHeight = 180
+    const calendarSpacing = 20
+    const cols = 4
+    const rows = 3
+    
+    const totalWidth = cols * calendarWidth + (cols - 1) * calendarSpacing + margin.left + margin.right
+    const totalHeight = rows * calendarHeight + (rows - 1) * calendarSpacing + margin.top + margin.bottom
 
     // Create main group
     const g = svg
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
+      .attr('width', totalWidth)
+      .attr('height', totalHeight)
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`)
 
-    // Get date range
-    const dates = contracts.map(c => c.expirationDate)
-    const minDate = d3.min(dates)
-    const maxDate = d3.max(dates)
-    
-    // Get all months in range
-    const months = []
-    d3.timeMonths(
-      new Date(minDate.getFullYear(), minDate.getMonth(), 1),
-      new Date(maxDate.getFullYear(), maxDate.getMonth() + 1, 1)
-    ).forEach(monthStart => {
-      const monthKey = d3.timeFormat('%Y-%m')(monthStart)
-      months.push({
-        start: monthStart,
-        key: monthKey,
-        label: d3.timeFormat('%b %Y')(monthStart)
+    // Group contracts by month and day
+    const monthData = new Map()
+    for (let month = 0; month < 12; month++) {
+      const monthContracts = yearContracts.filter(c => c.month === month)
+      const dayMap = new Map()
+      
+      monthContracts.forEach(contract => {
+        const day = contract.day
+        if (!dayMap.has(day)) {
+          dayMap.set(day, [])
+        }
+        dayMap.get(day).push(contract)
       })
-    })
+      
+      monthData.set(month, {
+        contracts: monthContracts,
+        dayMap: dayMap,
+        monthDate: new Date(selectedYear, month, 1)
+      })
+    }
 
-    // Group contracts by month and week
-    const heatmapData = new Map()
-    contracts.forEach(contract => {
-      const key = `${contract.month}-week${contract.weekOfMonth}`
-      if (!heatmapData.has(key)) {
-        heatmapData.set(key, {
-          month: contract.month,
-          weekOfMonth: contract.weekOfMonth,
-          contracts: [],
-          monthStart: new Date(contract.expirationDate.getFullYear(), contract.expirationDate.getMonth(), 1)
-        })
-      }
-      heatmapData.get(key).contracts.push(contract)
-    })
+    // Color scale based on urgency
+    const getColor = (days) => {
+      if (days < 0) return '#dc2626' // Expired - dark red
+      if (days <= 30) return '#ef4444' // Very soon - red
+      if (days <= 90) return '#f59e0b' // Soon - orange
+      if (days <= 180) return '#eab308' // Medium - yellow
+      if (days <= 365) return '#84cc16' // Far - light green
+      return '#22c55e' // Very far - green
+    }
 
-    // Calculate dimensions
-    const numMonths = months.length
-    const numWeeks = 5 // Maximum weeks in a month
-    const cellWidth = width / numMonths
-    const cellHeight = height / numWeeks
+    // Draw calendar for each month
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                        'July', 'August', 'September', 'October', 'November', 'December']
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-    // Color scale based on count
-    const maxCount = d3.max(Array.from(heatmapData.values()).map(d => d.contracts.length))
-    const colorScale = d3.scaleSequential(d3.interpolateYlOrRd)
-      .domain([0, Math.max(maxCount, 1)])
+    monthData.forEach((data, month) => {
+      const col = month % cols
+      const row = Math.floor(month / cols)
+      const x = col * (calendarWidth + calendarSpacing)
+      const y = row * (calendarHeight + calendarSpacing)
 
-    // Create scales
-    const xScale = d3.scaleBand()
-      .domain(months.map(m => m.key))
-      .range([0, width])
-      .padding(0.05)
+      const monthGroup = g.append('g')
+        .attr('transform', `translate(${x},${y})`)
 
-    const yScale = d3.scaleBand()
-      .domain(d3.range(1, numWeeks + 1))
-      .range([0, height])
-      .padding(0.05)
+      // Calendar dimensions
+      const cellSize = 20
+      const headerHeight = 40
+      const dayHeaderHeight = 20
+      const calendarContentHeight = calendarHeight - headerHeight - dayHeaderHeight
 
-    // Draw heatmap cells
-    months.forEach(month => {
-      for (let week = 1; week <= numWeeks; week++) {
-        const key = `${month.key}-week${week}`
-        const data = heatmapData.get(key)
-        const count = data ? data.contracts.length : 0
+      // Draw calendar background
+      monthGroup.append('rect')
+        .attr('width', calendarWidth)
+        .attr('height', calendarHeight)
+        .attr('fill', '#fff')
+        .attr('stroke', '#e5e7eb')
+        .attr('stroke-width', 2)
+        .attr('rx', 4)
 
-        const x = xScale(month.key)
-        const y = yScale(week)
+      // Month header
+      monthGroup.append('text')
+        .attr('x', calendarWidth / 2)
+        .attr('y', 25)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '16px')
+        .attr('font-weight', 'bold')
+        .attr('fill', '#333')
+        .text(monthNames[month])
+
+      // Day headers
+      dayNames.forEach((dayName, i) => {
+        monthGroup.append('text')
+          .attr('x', (i + 0.5) * (calendarWidth / 7))
+          .attr('y', headerHeight + 15)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '10px')
+          .attr('font-weight', '600')
+          .attr('fill', '#666')
+          .text(dayName)
+      })
+
+      // Get first day of month and number of days
+      const firstDay = new Date(selectedYear, month, 1)
+      const lastDay = new Date(selectedYear, month + 1, 0)
+      const daysInMonth = lastDay.getDate()
+      const firstDayOfWeek = firstDay.getDay()
+
+      // Draw calendar cells
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(selectedYear, month, day)
+        const dayOfWeek = date.getDay()
+        const week = Math.floor((day + firstDayOfWeek - 1) / 7)
+        
+        const cellX = dayOfWeek * (calendarWidth / 7)
+        const cellY = headerHeight + dayHeaderHeight + week * (calendarContentHeight / 6)
+
+        const contractsOnDay = data.dayMap.get(day) || []
+        const count = contractsOnDay.length
 
         // Draw cell
-        const cell = g.append('rect')
-          .attr('x', x)
-          .attr('y', y)
-          .attr('width', xScale.bandwidth())
-          .attr('height', yScale.bandwidth())
-          .attr('fill', count > 0 ? colorScale(count) : '#f5f5f5')
-          .attr('stroke', '#fff')
-          .attr('stroke-width', 1)
-          .attr('rx', 3)
+        const cell = monthGroup.append('rect')
+          .attr('x', cellX)
+          .attr('y', cellY)
+          .attr('width', calendarWidth / 7 - 1)
+          .attr('height', calendarContentHeight / 6 - 1)
+          .attr('fill', count > 0 ? getColor(contractsOnDay[0]?.daysUntilExpiration || 0) : '#f9fafb')
+          .attr('stroke', count > 0 ? '#fff' : '#e5e7eb')
+          .attr('stroke-width', count > 0 ? 2 : 1)
+          .attr('rx', 2)
           .style('cursor', count > 0 ? 'pointer' : 'default')
-          .on('mouseenter', function(event) {
-            if (count > 0 && data) {
+          .datum({ contracts: contractsOnDay, date: date })
+          .on('mouseenter', function(event, d) {
+            if (d.contracts.length > 0) {
               d3.select(this).attr('stroke-width', 3).attr('stroke', '#333')
-              setHoveredCell(data)
-              setTooltipPosition({ x: event.pageX, y: event.pageY })
+              setHoveredContract(d.contracts[0]) // Show first contract on hover
+              setTooltipPosition({ x: event.clientX, y: event.clientY })
             }
           })
-          .on('mouseleave', function() {
-            d3.select(this).attr('stroke-width', 1).attr('stroke', '#fff')
-            setHoveredCell(null)
+          .on('mousemove', function(event, d) {
+            if (d.contracts.length > 0) {
+              setTooltipPosition({ x: event.clientX, y: event.clientY })
+            }
+          })
+          .on('mouseleave', function(event, d) {
+            if (d.contracts.length > 0) {
+              d3.select(this).attr('stroke-width', 2).attr('stroke', '#fff')
+              setHoveredContract(null)
+            }
           })
 
-        // Add count label if > 0
-        if (count > 0) {
-          g.append('text')
-            .attr('x', x + xScale.bandwidth() / 2)
-            .attr('y', y + yScale.bandwidth() / 2)
-            .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'middle')
-            .attr('font-size', Math.min(xScale.bandwidth(), yScale.bandwidth()) * 0.25)
-            .attr('font-weight', 'bold')
-            .attr('fill', count > maxCount / 2 ? '#fff' : '#333')
-            .text(count)
-        }
+        // Day number
+        monthGroup.append('text')
+          .attr('x', cellX + 4)
+          .attr('y', cellY + 14)
+          .attr('font-size', '10px')
+          .attr('font-weight', count > 0 ? 'bold' : 'normal')
+          .attr('fill', count > 0 ? '#fff' : '#666')
+          .text(day)
+
       }
     })
-
-    // Add X axis (months)
-    const xAxis = g.append('g')
-      .attr('transform', `translate(0,${height})`)
-      .call(d3.axisBottom(xScale).tickFormat((d) => {
-        const month = months.find(m => m.key === d)
-        return month ? month.label : d
-      }))
-      .selectAll('text')
-      .attr('transform', 'rotate(-45)')
-      .attr('text-anchor', 'end')
-      .attr('dx', '-0.5em')
-      .attr('dy', '0.5em')
-      .attr('font-size', '11px')
-
-    // Add Y axis (weeks)
-    const yAxis = g.append('g')
-      .call(d3.axisLeft(yScale).tickFormat(d => `Week ${d}`))
-      .selectAll('text')
-      .attr('font-size', '12px')
 
     // Add title
     g.append('text')
-      .attr('x', width / 2)
-      .attr('y', -30)
+      .attr('x', (cols * calendarWidth + (cols - 1) * calendarSpacing) / 2)
+      .attr('y', -50)
       .attr('text-anchor', 'middle')
       .attr('font-size', '28px')
       .attr('font-weight', 'bold')
       .attr('fill', '#333')
-      .text('Contract Expiration Heatmap')
-
-    // Add axis labels
-    g.append('text')
-      .attr('x', width / 2)
-      .attr('y', height + 60)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '14px')
-      .attr('fill', '#666')
-      .text('Month')
-
-    g.append('text')
-      .attr('transform', 'rotate(-90)')
-      .attr('x', -height / 2)
-      .attr('y', -60)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '14px')
-      .attr('fill', '#666')
-      .text('Week of Month')
-
-    // Add legend
-    const legendWidth = 300
-    const legendHeight = 25
-    const legendX = width - legendWidth - 20
-    const legendY = -80
-
-    const legendG = g.append('g')
-      .attr('transform', `translate(${legendX},${legendY})`)
-
-    const legendSteps = 50
-    const legendData = d3.range(0, maxCount + 1, maxCount / legendSteps)
-    
-    legendG.selectAll('.legend-cell')
-      .data(legendData)
-      .enter()
-      .append('rect')
-      .attr('x', (d, i) => (i / legendData.length) * legendWidth)
-      .attr('width', legendWidth / legendData.length)
-      .attr('height', legendHeight)
-      .attr('fill', d => colorScale(d))
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 0.5)
-
-    // Legend axis
-    const legendScale = d3.scaleLinear()
-      .domain([0, maxCount])
-      .range([0, legendWidth])
-
-    const legendAxis = d3.axisBottom(legendScale)
-      .ticks(5)
-      .tickFormat(d => Math.round(d))
-
-    legendG.append('g')
-      .attr('transform', `translate(0,${legendHeight})`)
-      .call(legendAxis)
-      .selectAll('text')
-      .attr('font-size', '10px')
-      .attr('fill', '#666')
-
-    legendG.append('text')
-      .attr('x', legendWidth / 2)
-      .attr('y', -8)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '13px')
-      .attr('font-weight', '500')
-      .attr('fill', '#666')
-      .text('Number of Contracts Expiring')
+      .text(`Contract Expiration Calendar - ${selectedYear}`)
 
     // Add summary stats
-    const totalContracts = contracts.length
-    const activeCells = Array.from(heatmapData.values()).filter(d => d.contracts.length > 0).length
+    const totalContracts = yearContracts.length
+    const expiredCount = yearContracts.filter(c => c.daysUntilExpiration < 0).length
+    const urgentCount = yearContracts.filter(c => c.daysUntilExpiration >= 0 && c.daysUntilExpiration <= 90).length
     
     g.append('text')
       .attr('x', 0)
-      .attr('y', -30)
+      .attr('y', -20)
       .attr('font-size', '14px')
       .attr('fill', '#666')
-      .text(`Total Contracts: ${totalContracts} | Active Periods: ${activeCells}`)
+      .text(`Total Contracts: ${totalContracts} | Expired: ${expiredCount} | Urgent (≤90 days): ${urgentCount}`)
 
-  }, [originalData])
+  }, [originalData, selectedYear])
 
   return (
     <div className="expiration-visualization-container">
       {originalData && originalData.rows && originalData.rows.length > 0 ? (
         <>
           <div className="visualization-wrapper">
+            <div className="year-selector-inline">
+              <label htmlFor="year-select" className="year-selector-label">
+                Year:
+              </label>
+              <select
+                id="year-select"
+                value={selectedYear || ''}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="year-selector"
+              >
+                {availableYears.map(year => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
             <svg ref={svgRef}></svg>
           </div>
-          {hoveredCell && hoveredCell.contracts.length > 0 && (
+          {hoveredContract && (
             <div 
               className="month-tooltip"
               style={{
-                left: `${tooltipPosition.x + 20}px`,
-                top: `${tooltipPosition.y + 20}px`
+                left: `${tooltipPosition.x + 10}px`,
+                top: `${tooltipPosition.y + 10}px`
               }}
             >
               <div className="tooltip-header">
-                <h3>
-                  {d3.timeFormat('%B %Y')(hoveredCell.monthStart)} - Week {hoveredCell.weekOfMonth}
-                </h3>
-                <span className="tooltip-count">{hoveredCell.contracts.length} contract{hoveredCell.contracts.length !== 1 ? 's' : ''}</span>
+                <h3>Contract Details</h3>
               </div>
               <div className="tooltip-contracts">
-                {hoveredCell.contracts.map((contract, idx) => (
-                  <div key={idx} className="tooltip-contract-item">
-                    <span className="contract-id">{contract.id}</span>
-                    <span className="contract-party">{contract.contractingParty}</span>
-                    <span className="contract-date">
-                      {contract.expirationDate.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: 'numeric' 
-                      })}
-                    </span>
-                  </div>
-                ))}
+                <div className="tooltip-contract-item">
+                  <span className="contract-id">ID: {hoveredContract.id}</span>
+                  <span className="contract-party">{hoveredContract.contractingParty}</span>
+                  <span className="contract-date">
+                    Expires: {hoveredContract.expirationDate.toLocaleDateString('en-US', { 
+                      month: 'long', 
+                      day: 'numeric', 
+                      year: 'numeric' 
+                    })}
+                  </span>
+                  <span className="contract-days" style={{
+                    color: hoveredContract.daysUntilExpiration < 0 ? '#dc2626' :
+                           hoveredContract.daysUntilExpiration <= 30 ? '#ef4444' :
+                           hoveredContract.daysUntilExpiration <= 90 ? '#f59e0b' :
+                           hoveredContract.daysUntilExpiration <= 180 ? '#eab308' :
+                           hoveredContract.daysUntilExpiration <= 365 ? '#84cc16' : '#22c55e',
+                    fontWeight: 'bold'
+                  }}>
+                    {hoveredContract.daysUntilExpiration < 0 
+                      ? `Expired ${Math.abs(hoveredContract.daysUntilExpiration)} days ago`
+                      : `${hoveredContract.daysUntilExpiration} days until expiration`}
+                  </span>
+                </div>
               </div>
             </div>
           )}

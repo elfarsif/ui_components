@@ -6,12 +6,50 @@
   position: relative;
 }
 
+.year-selector-inline {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.year-selector-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.year-selector {
+  padding: 0.4rem 0.8rem;
+  font-size: 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.year-selector:hover {
+  border-color: #646cff;
+}
+
+.year-selector:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
 .visualization-wrapper {
   background-color: white;
   border-radius: 8px;
   padding: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
+  position: relative;
 }
 
 .visualization-wrapper svg {
@@ -46,6 +84,7 @@
   overflow-y: auto;
   z-index: 1000;
   pointer-events: none;
+  transform: translate(0, 0);
 }
 
 .tooltip-header {

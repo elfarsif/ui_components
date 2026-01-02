@@ -1,0 +1,107 @@
+.expiration-visualization-container {
+  width: 100%;
+  padding: 2rem;
+  background-color: #fafafa;
+  min-height: 100vh;
+  position: relative;
+}
+
+.visualization-wrapper {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.visualization-wrapper svg {
+  display: block;
+  margin: 0 auto;
+}
+
+.month-cell {
+  transition: transform 0.2s;
+}
+
+.month-cell:hover {
+  transform: scale(1.05);
+}
+
+.waiting-message {
+  color: #888;
+  font-style: italic;
+  padding: 2rem;
+  text-align: center;
+}
+
+.month-tooltip {
+  position: fixed;
+  background: white;
+  border: 2px solid #333;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  max-width: 400px;
+  max-height: 500px;
+  overflow-y: auto;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tooltip-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.tooltip-count {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 600;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.tooltip-contracts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tooltip-contract-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border-left: 3px solid #646cff;
+}
+
+.contract-id {
+  font-weight: bold;
+  color: #646cff;
+  font-size: 0.9rem;
+}
+
+.contract-party {
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.contract-date {
+  font-size: 0.85rem;
+  color: #666;
+}

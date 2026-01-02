@@ -11,6 +11,7 @@ import CounterpartyListExtended from './pages/counterpartylistextended/Counterpa
 import CounterpartyFilter2 from './pages/counterpartyfilter2/CounterpartyFilter2.jsx'
 import SidePanel from './pages/sidepanel/SidePanel.jsx'
 import FormPage_Add from './pages/FormPage_Add.jsx'
+import ExpirationDateVisualization from './pages/expirationDateVisualization/ExpirationDateVisualization.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HashRouter>
@@ -24,6 +25,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/counterpartylistextended" element={<CounterpartyListExtended />} />
         <Route path="/side-panel" element={<SidePanel />} />
         <Route path="/form-add" element={<FormPage_Add />} />
+        <Route path="/expirationDateVisualization" element={<ExpirationDateVisualization />} />
       </Routes>
     </HashRouter>
   </StrictMode>,

@@ -361,6 +361,14 @@ function ExpirationDateVisualization() {
                 ))}
               </select>
             </div>
+            <button
+              className="open-new-tab-button"
+              onClick={() => {
+                window.open('https://en.wikipedia.org/wiki/Main_Page', '_blank', 'noopener,noreferrer')
+              }}
+            >
+              Open in new tab (parent)
+            </button>
             <svg ref={svgRef}></svg>
           </div>
           {(hoveredContract || selectedContracts) && (

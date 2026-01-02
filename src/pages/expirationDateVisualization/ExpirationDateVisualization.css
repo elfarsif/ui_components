@@ -43,6 +43,32 @@
   box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
 }
 
+.open-new-tab-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.open-new-tab-button:hover {
+  border-color: #646cff;
+  background: #f8f9ff;
+  color: #646cff;
+}
+
+.open-new-tab-button:active {
+  transform: scale(0.98);
+}
+
 .visualization-wrapper {
   background-color: white;
   border-radius: 8px;

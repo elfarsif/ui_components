@@ -24,7 +24,8 @@ function ExpirationDateVisualization() {
     // Parse expiration dates and filter out nulls
     const contracts = originalData.rows
       .map(row => {
-        const expDate = row.expdate
+        // Support both field names: expdate and expiration_date
+        const expDate = row.expdate || row.expiration_date
         if (!expDate) return null
         
         // Parse date - handle both "MM-DD-YYYY" and "YYYY-MM-DD" formats
@@ -35,6 +36,7 @@ function ExpirationDateVisualization() {
             if (parts[0].length === 4) {
               date = new Date(expDate) // YYYY-MM-DD format
             } else {
+              // MM-DD-YYYY format
               const month = parseInt(parts[0], 10) - 1
               const day = parseInt(parts[1], 10)
               const year = parseInt(parts[2], 10)
@@ -48,9 +50,12 @@ function ExpirationDateVisualization() {
         date.setHours(0, 0, 0, 0)
         const daysUntilExpiration = Math.ceil((date - today) / (1000 * 60 * 60 * 24))
         
+        // Support both field names: dyn101208 and contracting_party
+        const contractingParty = row.dyn101208 || row.contracting_party || 'N/A'
+        
         return {
           id: row.id,
-          contractingParty: row.dyn101208 || 'N/A',
+          contractingParty: contractingParty,
           expirationDate: date,
           dateString: expDate,
           daysUntilExpiration: daysUntilExpiration,

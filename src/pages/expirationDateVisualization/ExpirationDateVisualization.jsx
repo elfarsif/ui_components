@@ -9,7 +9,9 @@ function ExpirationDateVisualization() {
   const [selectedYear, setSelectedYear] = useState(null)
   const [availableYears, setAvailableYears] = useState([])
   const [hoveredContract, setHoveredContract] = useState(null)
+  const [selectedContracts, setSelectedContracts] = useState(null) // Changed to array
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+  const [tooltipAbove, setTooltipAbove] = useState(false)
 
   useEffect(() => {
     if (!originalData || !originalData.rows || originalData.rows.length === 0) {
@@ -197,6 +199,10 @@ function ExpirationDateVisualization() {
         const contractsOnDay = data.dayMap.get(day) || []
         const count = contractsOnDay.length
 
+        // Check if this cell contains the selected contracts
+        const isSelected = selectedContracts && contractsOnDay.length > 0 && 
+          contractsOnDay[0].dateString === selectedContracts[0]?.dateString
+        
         // Draw cell
         const cell = monthGroup.append('rect')
           .attr('x', cellX)
@@ -204,27 +210,67 @@ function ExpirationDateVisualization() {
           .attr('width', calendarWidth / 7 - 1)
           .attr('height', calendarContentHeight / 6 - 1)
           .attr('fill', count > 0 ? getColor(contractsOnDay[0]?.daysUntilExpiration || 0) : '#f9fafb')
-          .attr('stroke', count > 0 ? '#fff' : '#e5e7eb')
-          .attr('stroke-width', count > 0 ? 2 : 1)
+          .attr('stroke', isSelected ? '#333' : (count > 0 ? '#fff' : '#e5e7eb'))
+          .attr('stroke-width', isSelected ? 4 : (count > 0 ? 2 : 1))
           .attr('rx', 2)
           .style('cursor', count > 0 ? 'pointer' : 'default')
+          .attr('data-contract-cell', count > 0 ? 'true' : 'false')
           .datum({ contracts: contractsOnDay, date: date })
           .on('mouseenter', function(event, d) {
             if (d.contracts.length > 0) {
-              d3.select(this).attr('stroke-width', 3).attr('stroke', '#333')
-              setHoveredContract(d.contracts[0]) // Show first contract on hover
-              setTooltipPosition({ x: event.clientX, y: event.clientY })
+              const isSelected = selectedContracts && d.contracts.length > 0 && 
+                d.contracts[0].dateString === selectedContracts[0]?.dateString
+              if (!isSelected) {
+                d3.select(this).attr('stroke-width', 3).attr('stroke', '#333')
+              }
+              if (!selectedContracts) {
+                // Check if month is in bottom row (September-December, months 8-11)
+                const isBottomRow = month >= 8
+                setTooltipAbove(isBottomRow)
+                setHoveredContract(d.contracts[0]) // Show first contract on hover
+                setTooltipPosition({ x: event.clientX, y: event.clientY })
+              }
             }
           })
           .on('mousemove', function(event, d) {
-            if (d.contracts.length > 0) {
+            if (d.contracts.length > 0 && !selectedContracts) {
+              const isBottomRow = month >= 8
+              setTooltipAbove(isBottomRow)
               setTooltipPosition({ x: event.clientX, y: event.clientY })
             }
           })
           .on('mouseleave', function(event, d) {
             if (d.contracts.length > 0) {
-              d3.select(this).attr('stroke-width', 2).attr('stroke', '#fff')
-              setHoveredContract(null)
+              const isSelected = selectedContracts && d.contracts.length > 0 && 
+                d.contracts[0].dateString === selectedContracts[0]?.dateString
+              if (!isSelected) {
+                d3.select(this).attr('stroke-width', 2).attr('stroke', '#fff')
+              }
+              if (!selectedContracts) {
+                setHoveredContract(null)
+              }
+            }
+          })
+          .on('click', function(event, d) {
+            event.stopPropagation()
+            if (d.contracts.length > 0) {
+              const isSelected = selectedContracts && d.contracts.length > 0 && 
+                d.contracts[0].dateString === selectedContracts[0]?.dateString
+              if (isSelected) {
+                // Clicking the same date deselects it
+                setSelectedContracts(null)
+                setHoveredContract(null)
+                d3.select(this).attr('stroke-width', 2).attr('stroke', '#fff')
+              } else {
+                // Check if month is in bottom row (September-December, months 8-11)
+                const isBottomRow = month >= 8
+                setTooltipAbove(isBottomRow)
+                // Select all contracts for this date
+                setSelectedContracts(d.contracts)
+                setHoveredContract(d.contracts[0])
+                setTooltipPosition({ x: event.clientX, y: event.clientY })
+                d3.select(this).attr('stroke-width', 4).attr('stroke', '#333')
+              }
             }
           })
 
@@ -235,6 +281,7 @@ function ExpirationDateVisualization() {
           .attr('font-size', '10px')
           .attr('font-weight', count > 0 ? 'bold' : 'normal')
           .attr('fill', count > 0 ? '#fff' : '#666')
+          .style('pointer-events', 'none')
           .text(day)
 
       }
@@ -262,7 +309,31 @@ function ExpirationDateVisualization() {
       .attr('fill', '#666')
       .text(`Total Contracts: ${totalContracts} | Expired: ${expiredCount} | Urgent (≤90 days): ${urgentCount}`)
 
-  }, [originalData, selectedYear])
+  }, [originalData, selectedYear, selectedContracts])
+
+  // Handle click outside to deselect
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (selectedContracts) {
+        const target = event.target
+        const isTooltip = target.closest('.month-tooltip')
+        const isContractCell = target.closest('rect[data-contract-cell="true"]') || target.tagName === 'rect'
+        const isYearSelector = target.closest('.year-selector-inline')
+        
+        if (!isTooltip && !isContractCell && !isYearSelector) {
+          setSelectedContracts(null)
+          setHoveredContract(null)
+        }
+      }
+    }
+
+    if (selectedContracts) {
+      document.addEventListener('click', handleClickOutside)
+      return () => {
+        document.removeEventListener('click', handleClickOutside)
+      }
+    }
+  }, [selectedContracts])
 
   return (
     <div className="expiration-visualization-container">
@@ -276,7 +347,11 @@ function ExpirationDateVisualization() {
               <select
                 id="year-select"
                 value={selectedYear || ''}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                onChange={(e) => {
+                  setSelectedYear(parseInt(e.target.value))
+                  setSelectedContracts(null)
+                  setHoveredContract(null)
+                }}
                 className="year-selector"
               >
                 {availableYears.map(year => (
@@ -288,41 +363,51 @@ function ExpirationDateVisualization() {
             </div>
             <svg ref={svgRef}></svg>
           </div>
-          {hoveredContract && (
+          {(hoveredContract || selectedContracts) && (
             <div 
               className="month-tooltip"
               style={{
                 left: `${tooltipPosition.x + 10}px`,
-                top: `${tooltipPosition.y + 10}px`
+                top: tooltipAbove 
+                  ? `${tooltipPosition.y - 10}px` 
+                  : `${tooltipPosition.y + 10}px`,
+                transform: tooltipAbove ? 'translateY(-100%)' : 'none'
               }}
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="tooltip-header">
-                <h3>Contract Details</h3>
+                <h3>
+                  {selectedContracts 
+                    ? `${selectedContracts.length} Contract${selectedContracts.length !== 1 ? 's' : ''} - ${selectedContracts[0].expirationDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+                    : 'Contract Details'}
+                </h3>
               </div>
               <div className="tooltip-contracts">
-                <div className="tooltip-contract-item">
-                  <span className="contract-id">ID: {hoveredContract.id}</span>
-                  <span className="contract-party">{hoveredContract.contractingParty}</span>
-                  <span className="contract-date">
-                    Expires: {hoveredContract.expirationDate.toLocaleDateString('en-US', { 
-                      month: 'long', 
-                      day: 'numeric', 
-                      year: 'numeric' 
-                    })}
-                  </span>
-                  <span className="contract-days" style={{
-                    color: hoveredContract.daysUntilExpiration < 0 ? '#dc2626' :
-                           hoveredContract.daysUntilExpiration <= 30 ? '#ef4444' :
-                           hoveredContract.daysUntilExpiration <= 90 ? '#f59e0b' :
-                           hoveredContract.daysUntilExpiration <= 180 ? '#eab308' :
-                           hoveredContract.daysUntilExpiration <= 365 ? '#84cc16' : '#22c55e',
-                    fontWeight: 'bold'
-                  }}>
-                    {hoveredContract.daysUntilExpiration < 0 
-                      ? `Expired ${Math.abs(hoveredContract.daysUntilExpiration)} days ago`
-                      : `${hoveredContract.daysUntilExpiration} days until expiration`}
-                  </span>
-                </div>
+                {(selectedContracts || [hoveredContract]).map((contract, idx) => (
+                  <div key={idx} className="tooltip-contract-item">
+                    <span className="contract-id">ID: {contract.id}</span>
+                    <span className="contract-party">{contract.contractingParty}</span>
+                    <span className="contract-date">
+                      Expires: {contract.expirationDate.toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                      })}
+                    </span>
+                    <span className="contract-days" style={{
+                      color: contract.daysUntilExpiration < 0 ? '#dc2626' :
+                             contract.daysUntilExpiration <= 30 ? '#ef4444' :
+                             contract.daysUntilExpiration <= 90 ? '#f59e0b' :
+                             contract.daysUntilExpiration <= 180 ? '#eab308' :
+                             contract.daysUntilExpiration <= 365 ? '#84cc16' : '#22c55e',
+                      fontWeight: 'bold'
+                    }}>
+                      {contract.daysUntilExpiration < 0 
+                        ? `Expired ${Math.abs(contract.daysUntilExpiration)} days ago`
+                        : `${contract.daysUntilExpiration} days until expiration`}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}

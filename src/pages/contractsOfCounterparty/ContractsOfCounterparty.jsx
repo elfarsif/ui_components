@@ -73,23 +73,15 @@ function ContractsOfCounterparty() {
   const handleSubmit = () => {
     if (!selectedRow) return
 
-    // Extract the first number from the id (before ":;")
-    let message = "Id : CO-"
-    if (selectedRow.id) {
-      const idString = String(selectedRow.id)
-      // Find the number before ":;"
-      const match = idString.match(/^(\d+):;/)
-      if (match && match[1]) {
-        message = `Id : CO-${match[1]}`
-      }
-    }
+    // Send all fields from the selected row
+    const dataToSend = { ...selectedRow }
 
     // Create LLM payload
     const llmPayload = {
       action: "contract_selection",
       timestamp: new Date().toISOString(),
       data: {
-        ...selectedRow,
+        ...dataToSend,
         metadata: {
           source: "iframe_component",
           version: "1.0.0"
@@ -101,7 +93,7 @@ function ContractsOfCounterparty() {
     window.parent.postMessage(
       {
         type: "ui_component_user_message",
-        message: message, // plain text with "Id : CO-{number}"
+        message: formatFormValuesAsText(dataToSend), // plain text with all fields formatted nicely
         llmMessage: JSON.stringify(llmPayload)       // structured JSON
       },
       "*"
@@ -109,7 +101,7 @@ function ContractsOfCounterparty() {
 
     console.log("Data sent to parent:", {
       type: "ui_component_user_message",
-      message: message,
+      message: formatFormValuesAsText(dataToSend),
       llmMessage: llmPayload
     })
     window.parent.postMessage({ type: 'ui_component_close' }, '*')

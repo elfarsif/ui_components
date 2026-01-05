@@ -401,14 +401,14 @@ function ExpirationDateVisualization() {
                     key={idx} 
                     className="tooltip-contract-item"
                     onClick={() => {
-                      // Extract the first number from the id (before ":")
-                      let message = "Id : CO-"
+                      // Extract the number from the id (after ":;")
+                      let message = "https://ibmsw.sirioncloud.io/ux/#/show/tblcontracts/"
                       if (contract.id) {
                         const idString = String(contract.id)
-                        // Find the number before ":"
-                        const match = idString.match(/^(\d+):/)
+                        // Find the number after ":;"
+                        const match = idString.match(/:;(\d+)/)
                         if (match && match[1]) {
-                          message = `Id : CO-${match[1]}`
+                          message = `https://ibmsw.sirioncloud.io/ux/#/show/tblcontracts/${match[1]}`
                         }
                       }
                       
@@ -418,7 +418,7 @@ function ExpirationDateVisualization() {
                         timestamp: new Date().toISOString(),
                         data: {
                           contractId: contract.id,
-                          message: message,
+                          url: message,
                           metadata: {
                             source: "iframe_component",
                             version: "1.0.0"
@@ -429,7 +429,7 @@ function ExpirationDateVisualization() {
                       window.parent.postMessage(
                         {
                           type: "ui_component_user_message",
-                          message: message, // plain text with "Id : CO-{number}"
+                          message: message, // plain text with the link
                           llmMessage: JSON.stringify(llmPayload) // structured JSON
                         },
                         "*"

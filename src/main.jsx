@@ -13,6 +13,7 @@ import SidePanel from './pages/sidepanel/SidePanel.jsx'
 import FormPage_Add from './pages/FormPage_Add.jsx'
 import ExpirationDateVisualization from './pages/expirationDateVisualization/ExpirationDateVisualization.jsx'
 import ContractsOfCounterparty from './pages/contractsOfCounterparty/ContractsOfCounterparty.jsx'
+import CounterpartyNameSelector from './pages/counterpartyNameSelector/CounterpartyNameSelector.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <HashRouter>
@@ -28,6 +29,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/form-add" element={<FormPage_Add />} />
         <Route path="/expirationDateVisualization" element={<ExpirationDateVisualization />} />
         <Route path="/contractsOfCounterparty" element={<ContractsOfCounterparty />} />
+        <Route path="/counterpartyNameSelector" element={<CounterpartyNameSelector />} />
       </Routes>
     </HashRouter>
   </StrictMode>,

@@ -397,7 +397,21 @@ function ExpirationDateVisualization() {
               </div>
               <div className="tooltip-contracts">
                 {(selectedContracts || [hoveredContract]).map((contract, idx) => (
-                  <div key={idx} className="tooltip-contract-item">
+                  <div 
+                    key={idx} 
+                    className="tooltip-contract-item"
+                    onClick={() => {
+                      // Send message to parent to open link when contract item is clicked
+                      window.parent.postMessage(
+                        {
+                          type: 'ui_component_open_link',
+                          url: 'https://en.wikipedia.org/wiki/Main_Page'
+                        },
+                        '*'
+                      )
+                    }}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <span className="contract-id">ID: {contract.id}</span>
                     <span className="contract-party">{contract.contractingParty}</span>
                     <span className="contract-date">

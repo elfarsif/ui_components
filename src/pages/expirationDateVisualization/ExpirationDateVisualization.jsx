@@ -401,16 +401,24 @@ function ExpirationDateVisualization() {
                     key={idx} 
                     className="tooltip-contract-item"
                     onClick={() => {
-                      // Send message to parent to open link when contract item is clicked
-                      const url = "https://en.wikipedia.org/wiki/Main_Page"
+                      // Extract the first number from the id (before ":")
+                      let message = "Id : CO-"
+                      if (contract.id) {
+                        const idString = String(contract.id)
+                        // Find the number before ":"
+                        const match = idString.match(/^(\d+):/)
+                        if (match && match[1]) {
+                          message = `Id : CO-${match[1]}`
+                        }
+                      }
                       
                       // Create LLM payload
                       const llmPayload = {
-                        action: "open_link",
+                        action: "contract_selection",
                         timestamp: new Date().toISOString(),
                         data: {
-                          url: url,
                           contractId: contract.id,
+                          message: message,
                           metadata: {
                             source: "iframe_component",
                             version: "1.0.0"
@@ -421,7 +429,7 @@ function ExpirationDateVisualization() {
                       window.parent.postMessage(
                         {
                           type: "ui_component_user_message",
-                          message: url, // plain text
+                          message: message, // plain text with "Id : CO-{number}"
                           llmMessage: JSON.stringify(llmPayload) // structured JSON
                         },
                         "*"

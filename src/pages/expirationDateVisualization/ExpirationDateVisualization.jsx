@@ -402,12 +402,29 @@ function ExpirationDateVisualization() {
                     className="tooltip-contract-item"
                     onClick={() => {
                       // Send message to parent to open link when contract item is clicked
+                      const url = "https://en.wikipedia.org/wiki/Main_Page"
+                      
+                      // Create LLM payload
+                      const llmPayload = {
+                        action: "open_link",
+                        timestamp: new Date().toISOString(),
+                        data: {
+                          url: url,
+                          contractId: contract.id,
+                          metadata: {
+                            source: "iframe_component",
+                            version: "1.0.0"
+                          }
+                        }
+                      }
+
                       window.parent.postMessage(
                         {
-                          type: 'ui_component_open_link',
-                          url: 'https://en.wikipedia.org/wiki/Main_Page'
+                          type: "ui_component_user_message",
+                          message: url, // plain text
+                          llmMessage: JSON.stringify(llmPayload) // structured JSON
                         },
-                        '*'
+                        "*"
                       )
                     }}
                     style={{ cursor: 'pointer' }}

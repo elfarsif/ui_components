@@ -1,44 +1,5 @@
 import { useState, useEffect } from 'react'
 
-/**
- * Custom hook to handle iframe messages from parent window
- * Local hook for CounterpartyList page - accepts payload with { columns: [...], rows: [...] } structure
- * 
- * INPUT SCHEMA (Expected payload from parent):
- * 
- * Option 1: Structured message
- * {
- *   "type": "ui_component_render",
- *   "source": "agentos",
- *   "payload": {
- *     "columns": [
- *       {"key": "id", "label": "ID"},
- *       {"key": "name", "label": "Name"},
- *       {"key": "cf_cpAddress", "label": "Address"}
- *     ],
- *     "rows": [
- *       {"id": "CT06756", "name": "...", "cf_cpAddress": "..."},
- *       ...
- *     ]
- *   }
- * }
- * 
- * Option 2: Direct data structure (fallback)
- * {
- *   "columns": [
- *     {"key": "id", "label": "ID"},
- *     {"key": "name", "label": "Name"},
- *     {"key": "cf_cpAddress", "label": "Address"}
- *   ],
- *   "rows": [
- *     {"id": "CT06756", "name": "...", "cf_cpAddress": "..."},
- *     ...
- *   ]
- * }
- * 
- * @param {Function} onDataReceived - Callback function called when data is received
- * @returns {Object} - Object containing originalData with columns and rows arrays
- */
 export function useIframeMessages(onDataReceived) {
   const [originalData, setOriginalData] = useState(null)
 

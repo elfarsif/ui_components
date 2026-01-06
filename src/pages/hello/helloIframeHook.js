@@ -1,51 +1,5 @@
 import { useState, useEffect } from 'react'
 
-/**
- * Custom hook to handle iframe messages from parent window
- * Local hook for HelloWorld page - accepts payload with { columns: [...], rows: [...] } structure
- * 
- * INPUT SCHEMA (Expected payload from parent):
- * 
- * Option 1: Structured message
- * {
- *   "type": "ui_component_render",
- *   "source": "agentos",
- *   "payload": {
- *     "columns": [
- *       {"key": "id", "label": "Workflow ID"},
- *       {"key": "name", "label": "Workflow Name"}
- *     ],
- *     "rows": [
- *       {"id": "WL01002", "name": "MSA"},
- *       {"id": "WL01005", "name": "Other Folder"},
- *       ...
- *     ]
- *   }
- * }
- * 
- * Option 2: Direct data structure (fallback)
- * {
- *   "columns": [
- *     {"key": "id", "label": "Workflow ID"},
- *     {"key": "name", "label": "Workflow Name"}
- *   ],
- *   "rows": [
- *     {"id": "WL01002", "name": "MSA"},
- *     {"id": "WL01005", "name": "Other Folder"},
- *     ...
- *   ]
- * }
- * 
- * OUTPUT SCHEMA (Sent back to parent):
- * {
- *   "type": "ui_component_user_message",
- *   "message": "{\"id\":\"WL01002\"}",
- *   "llmMessage": "{\"action\":\"name_selection\",\"timestamp\":\"...\",\"data\":{\"id\":\"WL01002\",\"metadata\":{...}}}"
- * }
- * 
- * @param {Function} onDataReceived - Callback function called when data is received
- * @returns {Object} - Object containing originalData with columns and rows arrays
- */
 export function useIframeMessages(onDataReceived) {
   const [originalData, setOriginalData] = useState(null)
 

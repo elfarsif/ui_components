@@ -94,14 +94,13 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
   // Handle click outside to close calendar
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const clickedInsideInput =
-        wrapperRef.current && wrapperRef.current.contains(event.target)
-      const clickedInsidePopover =
-        popoverRef.current && popoverRef.current.contains(event.target)
+      const insideInput = wrapperRef.current?.contains(event.target)
+      const insidePopover = event.target.closest('.date-picker-popover')
+      const insideSelectMenu = event.target.closest('.searchable-select__menu')
 
-      if (!clickedInsideInput && !clickedInsidePopover) {
-        setIsOpen(false)
-      }
+      if (insideInput || insidePopover || insideSelectMenu) return
+
+      setIsOpen(false)
     }
 
     if (isOpen) {
@@ -129,9 +128,27 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
     'July', 'August', 'September', 'October', 'November', 'December'
   ]
 
-  // Generate years: 20 years in the past to current year
-  const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 40 }, (_, i) => currentYear - 20 + i)
+  const displayMonthValue =
+    monthOpen ? (monthSearch ?? '') : (monthSearch || months[month.getMonth()] || '')
+
+  // Generate years: 1950 through 2050 inclusive
+  const years = Array.from({ length: 101 }, (_, i) => 1950 + i)
+  const displayYearValue =
+    yearOpen ? (yearSearch ?? '') : (yearSearch || month.getFullYear().toString())
+
+  const openMonthSelect = () => {
+    if (monthBlurRef.current) clearTimeout(monthBlurRef.current)
+    setMonthOpen(true)
+    setIsOpen(true)
+    setMonthSearch('') // allow empty input for searching
+  }
+
+  const openYearSelect = () => {
+    if (yearBlurRef.current) clearTimeout(yearBlurRef.current)
+    setYearOpen(true)
+    setIsOpen(true)
+    setYearSearch('') // allow empty input for searching
+  }
 
   const handleMonthChange = (e) => {
     const newMonth = new Date(month)
@@ -219,12 +236,10 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
                   <input
                     type="text"
                     className="date-picker-select searchable-select__input"
-                    value={monthSearch || months[month.getMonth()] || ''}
+                    value={displayMonthValue}
                     placeholder="Month"
-                    onFocus={() => {
-                      if (monthBlurRef.current) clearTimeout(monthBlurRef.current)
-                      setMonthOpen(true)
-                    }}
+                    onFocus={openMonthSelect}
+                    onClick={openMonthSelect}
                     onChange={(e) => {
                       const next = e.target.value
                       setMonthSearch(next)
@@ -263,6 +278,7 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
                                 setMonthSearch(monthName)
                               }
                               setMonthOpen(false)
+                              setIsOpen(true) // ensure popover stays open after selecting month
                             }}
                           >
                             {monthName}
@@ -282,12 +298,10 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
                   <input
                     type="text"
                     className="date-picker-select searchable-select__input"
-                    value={yearSearch || month.getFullYear().toString()}
+                    value={displayYearValue}
                     placeholder="Year"
-                    onFocus={() => {
-                      if (yearBlurRef.current) clearTimeout(yearBlurRef.current)
-                      setYearOpen(true)
-                    }}
+                    onFocus={openYearSelect}
+                    onClick={openYearSelect}
                     onChange={(e) => {
                       const next = e.target.value
                       setYearSearch(next)
@@ -323,6 +337,7 @@ function DatePicker({ value, onChange, id, placeholder = 'Select date', classNam
                               setMonth(nextMonth)
                               setYearSearch(yearVal)
                               setYearOpen(false)
+                              setIsOpen(true) // ensure popover stays open after selecting year
                             }}
                           >
                             {yearVal}

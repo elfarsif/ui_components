@@ -45,7 +45,7 @@
   margin: 0.5rem auto;
   padding: 1rem 1.25rem;
   background-color: white;
-  border: 1px solid #d0d0d0;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
   text-align: left;
   width: 100%;
@@ -180,7 +180,7 @@
  
 form {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 0.75rem 1rem;
 }
  
@@ -200,7 +200,7 @@ form {
 .form-field label {
   display: block;
   margin-bottom: 0;
-  font-weight: normal;
+  font-weight: 500;
   color: #213547;
   font-size: 0.6em;
 }
@@ -214,7 +214,7 @@ form {
   width: 100%;
   padding: 0.4rem 0.6rem;
   background-color: white;
-  border: 1px solid #d0d0d0;
+  border: 1px solid #e5e7eb;
   border-radius: 4px;
   color: #213547;
   font-size: 0.6em;
@@ -225,7 +225,7 @@ form {
  
 .form-input:focus {
   outline: none;
-  border-color: #d0d0d0;
+  border-color: #e5e7eb;
 }
 
 .date-picker-wrapper {
@@ -262,16 +262,15 @@ form {
   position: fixed !important;
   top: 100%;
   left: 0;
-  margin-top: 0.25rem;
+  margin-top: 0.12rem;
   background: white !important;
-  border: 1px solid #d0d0d0;
+  border: 1px solid #e5e7eb;
   border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
   z-index: 2147483647 !important;
-  padding: 0.45rem 0.45rem 0.65rem;
-  min-width: 160px;
-  max-width: 240px;
-  width: 240px;
+  padding: 0.2rem 0.22rem 0.3rem;
+  min-width: 180px;
+  max-width: 220px;
+  width: 200px;
   overflow: visible;
   transform-origin: top left;
   isolation: isolate;
@@ -305,14 +304,15 @@ form {
 
 .date-picker-header {
   display: grid;
-  grid-template-columns: auto minmax(90px, 1fr) minmax(70px, 1fr) auto;
+  grid-template-columns: auto minmax(64px, 1fr) minmax(50px, 1fr) auto;
   align-items: center;
-  margin-bottom: 0.35rem;
-  gap: 0.55rem;
+  margin-bottom: 0.1rem;
+  gap: 0.2rem;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 0 0.1rem;
+  padding: 0;
+  padding-top: 0.1rem !important;
 }
 
 .date-picker-header .searchable-select {
@@ -324,14 +324,14 @@ form {
 
 .date-picker-header .month-select {
   width: 100%;
-  min-width: 80px;
-  max-width: 110px;
+  min-width: 60px;
+  max-width: 82px;
 }
 
 .date-picker-header .year-select {
   width: 100%;
-  min-width: 80px;
-  max-width: 110px;
+  min-width: 48px;
+  max-width: 68px;
 }
 
 .date-picker-header .searchable-select__menu {
@@ -354,9 +354,22 @@ form {
 
 .date-picker-header .searchable-select__input {
   width: 100%;
-  padding-left: 0.4rem !important;
-  padding-right: 1.4rem !important;
-  font-size: 0.65rem;
+  padding-left: 0.28rem !important;
+  padding-right: 0.95rem !important;
+  padding-top: 0.05rem !important;
+  padding-bottom: 0.05rem !important;
+  height: 1.45rem;
+  font-size: 0.54rem;
+}
+
+/* tighter year input */
+.date-picker-header .year-select .searchable-select__input {
+  padding-left: 0.26rem !important;
+  padding-right: 0.82rem !important;
+  padding-top: 0.05rem !important;
+  padding-bottom: 0.05rem !important;
+  height: 1.45rem;
+  font-size: 0.52rem;
 }
 
 .date-picker-header .searchable-select.open {
@@ -366,14 +379,15 @@ form {
 .date-picker-nav-button {
   background: none;
   border: none;
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   color: #213547;
   cursor: pointer;
-  padding: 0.2rem 0.4rem;
+  padding: 0.1rem 0.22rem;
   border-radius: 4px;
   transition: background-color 0.2s;
   line-height: 1;
-  min-width: 1.6rem;
+  min-width: 1.25rem;
+  min-height: 1.45rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -393,12 +407,12 @@ form {
 
 
 .date-picker-select {
-  padding: 0.25rem 0.4rem;
-  border: 1px solid #d0d0d0;
+  padding: 0.16rem 0.28rem;
+  border: 1px solid #e5e7eb;
   background-color: white;
   border-radius: 4px;
   color: #213547;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23213547' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
@@ -416,15 +430,15 @@ form {
 
 .date-picker-select:focus {
   outline: none;
-  border-color: #d0d0d0;
+  border-color: #e5e7eb;
 }
 
 .date-picker-select:active {
-  border-color: #d0d0d0;
+  border-color: #e5e7eb;
 }
 
 .date-picker-select:hover {
-  border-color: #d0d0d0;
+  border-color: #e5e7eb;
 }
 
 .date-picker {
@@ -497,12 +511,12 @@ form {
 }
 
 .date-picker .rdp-head_cell {
-  font-size: 0.5rem;
+  font-size: 0.44rem;
   font-weight: 200;
   font-style: normal;
   font-family: inherit;
   color: #213547;
-  padding: 0.2rem 0;
+  padding: 0.08rem 0;
   text-align: center;
   display: table-cell !important;
   width: calc(100% / 7) !important;
@@ -512,7 +526,7 @@ form {
 }
 
 .date-picker .rdp-weekday {
-  font-size: 0.7rem;
+  font-size: 0.55rem;
   font-weight: 500;
   font-style: normal;
   font-family: inherit;
@@ -524,19 +538,19 @@ form {
   text-align: center;
   vertical-align: middle;
   width: calc(100% / 7) !important;
-  padding: 0.05rem;
+  padding: 0.005rem 0;
   min-width: 0;
   flex: unset !important;
   position: relative;
 }
 
 .date-picker .rdp-day {
-  font-size: 0.7rem;
-  padding: 0.2rem;
+  font-size: 0.5rem;
+  padding: 0.05rem 0.05rem;
   transition: background-color 0.2s, box-shadow 0.2s;
   width: 100% !important;
   max-width: 100%;
-  height: 1.6rem;
+  height: 0.95rem;
   display: grid !important;
   place-items: center;
   text-align: center;
@@ -626,7 +640,7 @@ form {
 }
 
 .date-picker .rdp-day_selected {
-  background-color: #646cff !important;
+  background-color: #0d5e68 !important;
   color: #fff !important;
   font-weight: 600;
   border-radius: 6px !important;
@@ -640,18 +654,18 @@ form {
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  background: #646cff !important;
+  background: #0d5e68 !important;
   border-radius: 6px !important;
 }
 
 .date-picker .rdp-day_selected:hover {
-  background-color: #535bf2 !important;
+  background-color: #0b5059 !important;
   color: #fff !important;
 }
 
 .date-picker .rdp-day_selected:hover .rdp-button {
   color: #fff !important;
-  background: #535bf2 !important;
+  background: #0b5059 !important;
 }
 
 .date-picker .rdp-button:focus-visible,
@@ -674,7 +688,7 @@ form {
 form .submit-button,
 .submit-button {
   padding: 0.35rem 0.7rem !important;
-  background-color: #646cff !important;
+  background-color: #0d5e68 !important;
   border: none !important;
   border-radius: 4px;
   color: white;
@@ -691,7 +705,7 @@ form .submit-button,
 }
  
 .submit-button:hover {
-  background-color: #535bf2 !important;
+  background-color: #0c545d !important;
   border: none !important;
 }
 
@@ -702,7 +716,7 @@ form .submit-button,
 }
  
 .submit-button:active {
-  background-color: #4348d4;
+  background-color: #0a454d;
 }
  
 /* Searchable select */
@@ -750,7 +764,7 @@ form .submit-button,
   left: 0;
   right: 0;
   background: white;
-  border: 1px solid #d0d0d0;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   max-height: 240px;
@@ -779,6 +793,7 @@ form .submit-button,
 .searchable-select__option.is-selected {
   background: #eef1fb;
   font-weight: 400;
+  color: #0d5e68;
 }
 
 .searchable-select__option--empty {
@@ -793,7 +808,7 @@ form .submit-button,
 @media (prefers-color-scheme: light) {
   .data-display {
     background-color: white;
-    border-color: #d0d0d0;
+    border-color: #e5e7eb;
   }
  
   .columns-preview li {
@@ -830,11 +845,11 @@ form .submit-button,
   .form-input {
     background-color: white;
     color: #213547;
-    border-color: #d0d0d0;
+    border-color: #e5e7eb;
   }
 
   .form-input:focus {
-    border-color: #d0d0d0;
+    border-color: #e5e7eb;
   }
 }
  

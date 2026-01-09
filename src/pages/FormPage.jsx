@@ -8,6 +8,7 @@ function FormPage() {
   const [searchTerms, setSearchTerms] = useState({})
   const [openDropdown, setOpenDropdown] = useState(null)
   const blurTimeoutRef = useRef(null)
+  const inputRefs = useRef({})
 
   // Receive data from iframe messages
   const { originalData } = useIframeMessages((initialValues) => {
@@ -136,6 +137,13 @@ function FormPage() {
                 filteredOptions.unshift(value)
               }
 
+              const openDropdownForKey = () => {
+                if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+                setOpenDropdown(columnKey)
+                const inputEl = inputRefs.current[columnKey]
+                if (inputEl) inputEl.focus()
+              }
+
               const renderField = () => {
                 // Date picker
                 if (isDateField) {
@@ -158,6 +166,11 @@ function FormPage() {
                   return (
                   <div
                     className={`searchable-select ${openDropdown === columnKey ? 'open' : ''}`}
+                    onMouseDown={(e) => {
+                      // Allow opening dropdown when clicking anywhere on the control (input or chevron)
+                      if (e.target.closest('.searchable-select__menu')) return
+                      openDropdownForKey()
+                    }}
                   >
                     <div className="searchable-select__control">
                       <input
@@ -165,11 +178,11 @@ function FormPage() {
                         id={`field-${index}`}
                         className="form-input searchable-select__input"
                         placeholder={`Search ${columnLabel.toLowerCase()}`}
-                        value={value || searchTerm}
-                        onFocus={() => {
-                          if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
-                          setOpenDropdown(columnKey)
+                        ref={(el) => {
+                          if (el) inputRefs.current[columnKey] = el
                         }}
+                        value={value || searchTerm}
+                        onFocus={openDropdownForKey}
                         onChange={(e) => {
                           const next = e.target.value
                           setSearchTerms((prev) => ({

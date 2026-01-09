@@ -5,7 +5,6 @@
   text-align: left;
   color: #212529;
   font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-  border: 1px solid #d9dce1;
   border-radius: 8px;
   background-color: #ffffff;
 }
@@ -19,7 +18,7 @@
 .dropdown-container label {
   display: inline-block;
   font-size: 0.6em;
-  font-weight: normal;
+  font-weight: 500;
   color: #2a2e34;
 }
 
@@ -28,7 +27,7 @@
   box-sizing: border-box;
   padding: 0.5rem 0.75rem;
   background-color: #ffffff;
-  border: 1px solid #c7cbd3;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
   color: #1f2429;
   font-size: 0.6em;
@@ -64,10 +63,8 @@
 }
 
 .submit-button {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   padding: 0.65rem 1.25rem;
-  background-color: #2563eb;
-  border: 1px solid #2563eb;
   border-radius: 4px;
   color: white;
   font-size: 1.75rem;
@@ -75,17 +72,8 @@
   font-family: inherit;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  width: 100%;
-}
-
-.submit-button:hover:not(:disabled) {
-  background-color: #1f54c7;
-  border-color: #1f54c7;
-  box-shadow: 0 2px 6px rgba(31, 84, 199, 0.18);
-}
-
-.submit-button:active:not(:disabled) {
-  background-color: #1747ad;
+  width: fit-content;
+  align-self: flex-end;
 }
 
 .submit-button:disabled {

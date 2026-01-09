@@ -8,6 +8,10 @@ function HelloWorld() {
   const [isOpen, setIsOpen] = useState(false)
   const blurTimeoutRef = useRef(null)
   const { originalData } = useIframeMessages()
+  const openDropdown = () => {
+    if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+    setIsOpen(true)
+  }
 
   /**
    * Extract unique names from rows
@@ -98,10 +102,8 @@ function HelloWorld() {
                 className="name-dropdown searchable-select__input"
                 placeholder="Search workflow"
                 value={selectedName || searchTerm}
-                onFocus={() => {
-                  if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
-                  setIsOpen(true)
-                }}
+                onFocus={openDropdown}
+                onClick={openDropdown}
                 onChange={(e) => {
                   const next = e.target.value
                   setSearchTerm(next)
@@ -112,7 +114,14 @@ function HelloWorld() {
                 }}
                 autoComplete="off"
               />
-              <span className="searchable-select__chevron" aria-hidden="true"></span>
+                <span
+                  className="searchable-select__chevron"
+                  aria-hidden="true"
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    openDropdown()
+                  }}
+                ></span>
             </div>
             {isOpen && (
               <div className="searchable-select__menu">

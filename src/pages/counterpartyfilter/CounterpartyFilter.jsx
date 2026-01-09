@@ -36,6 +36,10 @@ function CounterpartyFilter() {
   const [countrySearch, setCountrySearch] = useState('')
   const [countryOpen, setCountryOpen] = useState(false)
   const blurTimeoutRef = useRef(null)
+  const openCountrySelect = () => {
+    if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
+    setCountryOpen(true)
+  }
 
   const formatAsPlainText = ({ counterpartyName, address }) => {
     const lines = []
@@ -94,8 +98,8 @@ function CounterpartyFilter() {
     <div className="dropdown-container">
       <div className="data-display">
         <form onSubmit={handleSubmit}>
-          <div className="form-field">
-            <label htmlFor="counterparty-name">Counterparty Name:</label>
+            <div className="form-field">
+             <label htmlFor="counterparty-name" style={{ fontWeight: 500 }}>Counterparty Name</label>
             <input
               id="counterparty-name"
               type="text"
@@ -105,8 +109,8 @@ function CounterpartyFilter() {
               className="form-input"
             />
           </div>
-          <div className="form-field">
-            <label htmlFor="address">Address:</label>
+            <div className="form-field">
+             <label htmlFor="address" style={{ fontWeight: 500 }}>Address</label>
             <input
               id="address"
               type="text"
@@ -116,9 +120,15 @@ function CounterpartyFilter() {
               className="form-input"
             />
           </div>
-          <div className="form-field">
-            <label htmlFor="country">Country:</label>
-            <div className={`searchable-select ${countryOpen ? 'open' : ''}`}>
+            <div className="form-field">
+             <label htmlFor="country" style={{ fontWeight: 500 }}>Country</label>
+            <div
+              className={`searchable-select ${countryOpen ? 'open' : ''}`}
+              onMouseDown={() => {
+                // open on any click within the control, before blur fires
+                openCountrySelect()
+              }}
+            >
               <div className="searchable-select__control">
                 <input
                   type="text"
@@ -126,10 +136,8 @@ function CounterpartyFilter() {
                   className="form-input searchable-select__input"
                   placeholder="Search country"
                   value={country || countrySearch}
-                  onFocus={() => {
-                    if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current)
-                    setCountryOpen(true)
-                  }}
+                  onFocus={openCountrySelect}
+                  onClick={openCountrySelect}
                   onChange={(e) => {
                     const next = e.target.value
                     setCountrySearch(next)

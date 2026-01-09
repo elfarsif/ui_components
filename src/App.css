@@ -739,8 +739,9 @@ form .submit-button,
 .searchable-select__input {
   padding-right: 2rem !important;
   cursor: text;
-  font-size: 0.7rem;
+  font-size: 0.6em; /* match form-input text size */
   line-height: 1.4;
+  font-family: inherit;
 }
 
 .searchable-select__chevron {

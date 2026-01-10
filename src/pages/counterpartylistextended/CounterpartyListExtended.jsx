@@ -168,12 +168,6 @@ function CounterpartyListExtended() {
     <div>
       {originalData && originalData.rows && originalData.rows.length > 0 ? (
         <div className="counterparty-list-wrapper">
-          {/* Header */}
-          <div className="counterparty-list-header">
-            <h2 className="counterparty-list-title">Counterparties</h2>
-            <span className="counterparty-list-count">preview</span>
-          </div>
-
           {/* Card Grid */}
           <div className="counterparty-card-grid">
             {[...originalData.rows]
@@ -185,10 +179,23 @@ function CounterpartyListExtended() {
               .map((row, index) => {
               const isSelected = isRowSelected(row, index)
               const countryCode = getCountryCode(row)
-              
-              // Get the first field value for the ID badge
-              const firstColumn = columns.length > 0 ? columns[0] : null
-              const firstFieldValue = firstColumn ? getFieldValue(row, firstColumn.key) : null
+
+              const name = getFieldValue(row, 'name') || getFieldValue(row, columns[0]?.key)
+              const issuingCountry = getFieldValue(row, 'dyn102926') || getFieldValue(row, 'issuingCountryDescription') || getFieldValue(row, 'issuingCountry') || countryCode
+              const addressLine = getFieldValue(row, 'address') || getFieldValue(row, 'cf_cpAddress') || ''
+              const counterpartyId = getFieldValue(row, 'dyn102809') || getFieldValue(row, 'counterpartyId') || getFieldValue(row, 'id')
+
+              const excludedKeys = new Set([
+                'name',
+                'address',
+                'cf_cpAddress',
+                'dyn102926',
+                'issuingCountryDescription',
+                'issuingCountry',
+                'country'
+              ])
+
+              const detailFields = columns.filter(col => !excludedKeys.has(col.key))
 
               return (
                 <div
@@ -196,21 +203,45 @@ function CounterpartyListExtended() {
                   onClick={() => handleRowClick(row)}
                   className={`counterparty-card ${isSelected ? 'is-selected' : ''}`}
                 >
-                  <div className="counterparty-card__top">
-                    <span className="counterparty-card__status">{countryCode || 'N/A'}</span>
-                    {firstFieldValue && <span className="counterparty-card__id">{firstFieldValue}</span>}
+                  <div className="counterparty-card__header-row">
+                    <div className="counterparty-card__header-left">
+                      {name && <div className="counterparty-card__title">{name}</div>}
+                      {(addressLine || counterpartyId) && (
+                        <div className="counterparty-card__subtitle">
+                          {counterpartyId && (
+                            <span className="counterparty-card__subtitle-id">{counterpartyId}</span>
+                          )}
+                          {counterpartyId && addressLine && (
+                            <span className="counterparty-card__subtitle-separator">|</span>
+                          )}
+                          {addressLine && (
+                            <span className="counterparty-card__subtitle-address">{addressLine}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="counterparty-card__header-right">
+                      <div
+                        className="counterparty-card__meta-label counterparty-card__meta-label--title"
+                        style={{ textTransform: 'none', letterSpacing: 0 }}
+                      >
+                        Issuing Country Description
+                      </div>
+                      <div className="counterparty-card__meta-value">{issuingCountry || 'N/A'}</div>
+                    </div>
                   </div>
 
+                  <div className="counterparty-card__divider" />
+
                   <div className="counterparty-card__body">
-                    {/* Display all fields with labels */}
-                    {columns.map((column) => {
+                    {detailFields.map((column) => {
                       const value = getFieldValue(row, column.key)
-                      const displayValue = value || 'N/A'
-                      
+                      const displayValue = value || '—'
+
                       return (
                         <div key={column.key} className="counterparty-card__meta-line">
                           <span className="counterparty-card__meta-label-inline">
-                            {column.label}: 
+                            {column.label}
                           </span>
                           <span className="counterparty-card__meta-value-inline">
                             {displayValue}
@@ -242,5 +273,4 @@ function CounterpartyListExtended() {
     </div>
   )
 }
-
 export default CounterpartyListExtended
